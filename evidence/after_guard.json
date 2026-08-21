@@ -1,0 +1,408 @@
+{
+  "generated_at": "2026-08-21T18:08:38.611390+00:00",
+  "phase": "after_guard",
+  "note": "The guard was exercised against hand-crafted adversarial fixtures in tests/fixtures/ — LLM-shaped responses that WOULD be false reconciliations if produced live. The live batch (before_guard.json) produced 0 false reconciliations, so this artifact intentionally uses synthetic worst-case model outputs to prove the guard has teeth.",
+  "counts": {
+    "adversarial": {
+      "total": 6,
+      "rejected_by_guard": 6,
+      "false_positives": 0
+    },
+    "positive": {
+      "total": 4,
+      "accepted_by_guard": 4,
+      "false_rejections": 0
+    }
+  },
+  "records": [
+    {
+      "fixture": "adversarial_fabricated_fee.json",
+      "kind": "adversarial",
+      "description": "Naive adversarial: LLM proposes actual_fee=113.82 (2% + 18% GST, a plausible-sounding number) on ORD-0006. Neither the settlement nor the LLM's proposed math balances. gross(4823.00) - fee_charged(96.46) = 4726.54, but settled is 4703.20 (settlement internally inconsistent). And gross(4823.00) - actual_fee(113.82) = 4709.18, also not equal to settled. Guard rejects on both counts.",
+      "llm_claim_category": "FEE_VARIANCE",
+      "llm_reconciles": true,
+      "llm_claim": {
+        "actual_fee": "113.82"
+      },
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_final_category": "GENUINE_MISMATCH",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: settlement_internally_consistent (gross Rs.4823.00 - fee_charged Rs.96.46 = Rs.4726.54; settled Rs.4703.20; gap Rs.23.34; tolerance Rs.4.82) | llm_actual_fee_agrees_with_payout (LLM's actual_fee Rs.113.82 vs payout's fee_charged Rs.96.46; gap Rs.17.36; tolerance Rs.4.82)",
+      "checks": [
+        {
+          "name": "order_exists",
+          "passed": true,
+          "detail": "order ORD-0006"
+        },
+        {
+          "name": "payout_count",
+          "passed": true,
+          "detail": "exactly 1 in-window payout"
+        },
+        {
+          "name": "settlement_internally_consistent",
+          "passed": false,
+          "detail": "gross Rs.4823.00 - fee_charged Rs.96.46 = Rs.4726.54; settled Rs.4703.20; gap Rs.23.34; tolerance Rs.4.82"
+        },
+        {
+          "name": "llm_actual_fee_provided",
+          "passed": true,
+          "detail": "claim.actual_fee = Rs.113.82"
+        },
+        {
+          "name": "llm_actual_fee_agrees_with_payout",
+          "passed": false,
+          "detail": "LLM's actual_fee Rs.113.82 vs payout's fee_charged Rs.96.46; gap Rs.17.36; tolerance Rs.4.82"
+        }
+      ],
+      "matched_expectation": true
+    },
+    {
+      "fixture": "adversarial_fake_timing.json",
+      "kind": "adversarial",
+      "description": "LLM claims TIMING_WINDOW while there IS an in-window payout for this order. TIMING means 'settlement cleared outside this batch's window' — by definition there should be zero in-window payouts. Guard rejects because the presence of an in-window row contradicts the timing narrative; the discrepancy is about amounts, not timing.",
+      "llm_claim_category": "TIMING_WINDOW",
+      "llm_reconciles": true,
+      "llm_claim": {
+        "outside_window": true
+      },
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_final_category": "GENUINE_MISMATCH",
+      "guard_reason": "TIMING_WINDOW rejected. Failures: no_in_window_payouts (1 in-window payout(s); TIMING_WINDOW requires zero — any in-window payout means the discrepancy is about amounts/splits, not timing)",
+      "checks": [
+        {
+          "name": "order_exists",
+          "passed": true,
+          "detail": "order ORD-TESTTIMING"
+        },
+        {
+          "name": "no_in_window_payouts",
+          "passed": false,
+          "detail": "1 in-window payout(s); TIMING_WINDOW requires zero — any in-window payout means the discrepancy is about amounts/splits, not timing"
+        }
+      ],
+      "matched_expectation": true
+    },
+    {
+      "fixture": "adversarial_ghost_split_legs.json",
+      "kind": "adversarial",
+      "description": "LLM claims SPLIT_PAYOUT and cites leg_payout_ids ['PYT-Z1', 'PYT-Z2'] that do not exist among the in-window payouts for this order. If the guard trusted the LLM's claim without cross-referencing the payout registry, it would happily 'reconcile' against nonexistent rows. Anchored on the ORD-0043 messy-split shape from the live batch.",
+      "llm_claim_category": "SPLIT_PAYOUT",
+      "llm_reconciles": true,
+      "llm_claim": {
+        "leg_payout_ids": [
+          "PYT-Z1",
+          "PYT-Z2"
+        ]
+      },
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_final_category": "GENUINE_MISMATCH",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['PYT-Z1', 'PYT-Z2'] vs in-window payouts ['PYT-0043A', 'PYT-0043B']; missing/unknown: ['PYT-Z1', 'PYT-Z2'])",
+      "checks": [
+        {
+          "name": "order_exists",
+          "passed": true,
+          "detail": "order ORD-0043"
+        },
+        {
+          "name": "leg_payout_ids_shape",
+          "passed": true,
+          "detail": "2 leg IDs proposed"
+        },
+        {
+          "name": "all_legs_exist_and_in_window",
+          "passed": false,
+          "detail": "claimed leg IDs ['PYT-Z1', 'PYT-Z2'] vs in-window payouts ['PYT-0043A', 'PYT-0043B']; missing/unknown: ['PYT-Z1', 'PYT-Z2']"
+        }
+      ],
+      "matched_expectation": true
+    },
+    {
+      "fixture": "adversarial_invented_refund_wrong_arithmetic.json",
+      "kind": "adversarial",
+      "description": "Ledger.status IS 'partially_refunded' — so the status check passes. But the LLM's proposed refund_amount does not close the arithmetic against the payout's actual fee_charged. gross(5000.00) - fee_charged(118.00) - refund(150.00) = 4732.00, but settled is 4700.00; gap Rs.32.00 > tolerance Rs.5.00. Guard rejects on the arithmetic. Shows that a correct-status classification still has to survive the numerical check.",
+      "llm_claim_category": "PARTIAL_REFUND",
+      "llm_reconciles": true,
+      "llm_claim": {
+        "refund_amount": "150.00"
+      },
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_final_category": "GENUINE_MISMATCH",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: refund_arithmetic_closes (gross Rs.5000.00 - fee_charged Rs.118.00 - refund Rs.150.00 = Rs.4732.00; settled Rs.4700.00; gap Rs.32.00; tolerance Rs.5.00)",
+      "checks": [
+        {
+          "name": "order_exists",
+          "passed": true,
+          "detail": "order ORD-TESTREFUND"
+        },
+        {
+          "name": "ledger_status_supports_refund",
+          "passed": true,
+          "detail": "order.status = 'partially_refunded' (expected 'partially_refunded' or 'refunded')"
+        },
+        {
+          "name": "payout_count",
+          "passed": true,
+          "detail": "exactly 1 in-window payout"
+        },
+        {
+          "name": "refund_amount_provided",
+          "passed": true,
+          "detail": "claim.refund_amount = Rs.150.00"
+        },
+        {
+          "name": "refund_amount_non_negative",
+          "passed": true,
+          "detail": "refund Rs.150.00"
+        },
+        {
+          "name": "refund_arithmetic_closes",
+          "passed": false,
+          "detail": "gross Rs.5000.00 - fee_charged Rs.118.00 - refund Rs.150.00 = Rs.4732.00; settled Rs.4700.00; gap Rs.32.00; tolerance Rs.5.00"
+        }
+      ],
+      "matched_expectation": true
+    },
+    {
+      "fixture": "adversarial_invented_refund_wrong_status.json",
+      "kind": "adversarial",
+      "description": "LLM proposes PARTIAL_REFUND with refund_amount=133.90 on ORD-0011 (from the live batch). The arithmetic works: gross(8945.00) - fee_charged(211.10) - refund(133.90) = 8600.00 = settled_amount. But ledger.status is 'captured', not 'partially_refunded'. Guard rejects because the ledger does not corroborate the refund event. This shows the guard cross-references ledger evidence beyond just arithmetic.",
+      "llm_claim_category": "PARTIAL_REFUND",
+      "llm_reconciles": true,
+      "llm_claim": {
+        "refund_amount": "133.90"
+      },
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_final_category": "GENUINE_MISMATCH",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "checks": [
+        {
+          "name": "order_exists",
+          "passed": true,
+          "detail": "order ORD-0011"
+        },
+        {
+          "name": "ledger_status_supports_refund",
+          "passed": false,
+          "detail": "order.status = 'captured' (expected 'partially_refunded' or 'refunded')"
+        },
+        {
+          "name": "payout_count",
+          "passed": true,
+          "detail": "exactly 1 in-window payout"
+        },
+        {
+          "name": "refund_amount_provided",
+          "passed": true,
+          "detail": "claim.refund_amount = Rs.133.90"
+        },
+        {
+          "name": "refund_amount_non_negative",
+          "passed": true,
+          "detail": "refund Rs.133.90"
+        },
+        {
+          "name": "refund_arithmetic_closes",
+          "passed": true,
+          "detail": "gross Rs.8945.00 - fee_charged Rs.211.10 - refund Rs.133.90 = Rs.8600.00; settled Rs.8600.00; gap Rs.0.00; tolerance Rs.8.95"
+        }
+      ],
+      "matched_expectation": true
+    },
+    {
+      "fixture": "adversarial_selfconsistent_fee_lie.json",
+      "kind": "adversarial",
+      "description": "The 'smart lie.' LLM proposes actual_fee=119.80, which makes its own math perfect: gross(4823.00) - actual_fee(119.80) = 4703.20 = settled_amount. Guard rejects because 119.80 disagrees with the settlement row's actual fee_charged (96.46) by Rs.23.34, far outside the Rs.4.82 tolerance for a Rs.4823 gross. This is the pitch talking point: the guard validates against the settlement's own numbers, not against numbers the model produced. Anchored on ORD-0006 from the live batch.",
+      "llm_claim_category": "FEE_VARIANCE",
+      "llm_reconciles": true,
+      "llm_claim": {
+        "actual_fee": "119.80"
+      },
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_final_category": "GENUINE_MISMATCH",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.119.80 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.96.46 by Rs.23.34 (> tolerance Rs.4.82). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "checks": [
+        {
+          "name": "order_exists",
+          "passed": true,
+          "detail": "order ORD-0006"
+        },
+        {
+          "name": "payout_count",
+          "passed": true,
+          "detail": "exactly 1 in-window payout"
+        },
+        {
+          "name": "settlement_internally_consistent",
+          "passed": false,
+          "detail": "gross Rs.4823.00 - fee_charged Rs.96.46 = Rs.4726.54; settled Rs.4703.20; gap Rs.23.34; tolerance Rs.4.82"
+        },
+        {
+          "name": "llm_actual_fee_provided",
+          "passed": true,
+          "detail": "claim.actual_fee = Rs.119.80"
+        },
+        {
+          "name": "llm_actual_fee_agrees_with_payout",
+          "passed": false,
+          "detail": "LLM's actual_fee Rs.119.80 vs payout's fee_charged Rs.96.46; gap Rs.23.34; tolerance Rs.4.82"
+        }
+      ],
+      "matched_expectation": true
+    },
+    {
+      "fixture": "positive_llm_says_genuine_mismatch.json",
+      "kind": "positive",
+      "description": "LLM classifies as GENUINE_MISMATCH with reconciles=false — the honest 'I cannot reconcile this' verdict, matching what Gemini actually returned for ORD-0006 in the live batch. Guard accepts trivially because there is no claim to verify; the record is already escalated to human review.",
+      "llm_claim_category": "GENUINE_MISMATCH",
+      "llm_reconciles": false,
+      "llm_claim": {},
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_final_category": "GENUINE_MISMATCH",
+      "guard_reason": "LLM classified as GENUINE_MISMATCH; no claim to verify.",
+      "checks": [
+        {
+          "name": "llm_declined_to_classify",
+          "passed": true,
+          "detail": "reconciles=False, category=GENUINE_MISMATCH"
+        }
+      ],
+      "matched_expectation": true
+    },
+    {
+      "fixture": "positive_valid_fee_variance.json",
+      "kind": "positive",
+      "description": "A genuine fee-variance case, matching the scenario the live batch injects for fee_variance orders. Merchant expected a flat 2% fee (Rs.20.00); aggregator charged 2% + GST (Rs.23.60). Settlement is internally consistent (gross - fee_charged = settled) and the LLM's proposed actual_fee agrees with the payout's fee_charged. Guard accepts.",
+      "llm_claim_category": "FEE_VARIANCE",
+      "llm_reconciles": true,
+      "llm_claim": {
+        "actual_fee": "23.60"
+      },
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_final_category": "FEE_VARIANCE",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "checks": [
+        {
+          "name": "order_exists",
+          "passed": true,
+          "detail": "order ORD-POSFV"
+        },
+        {
+          "name": "payout_count",
+          "passed": true,
+          "detail": "exactly 1 in-window payout"
+        },
+        {
+          "name": "settlement_internally_consistent",
+          "passed": true,
+          "detail": "gross Rs.1000.00 - fee_charged Rs.23.60 = Rs.976.40; settled Rs.976.40; gap Rs.0.00; tolerance Rs.1.00"
+        },
+        {
+          "name": "llm_actual_fee_provided",
+          "passed": true,
+          "detail": "claim.actual_fee = Rs.23.60"
+        },
+        {
+          "name": "llm_actual_fee_agrees_with_payout",
+          "passed": true,
+          "detail": "LLM's actual_fee Rs.23.60 vs payout's fee_charged Rs.23.60; gap Rs.0.00; tolerance Rs.1.00"
+        }
+      ],
+      "matched_expectation": true
+    },
+    {
+      "fixture": "positive_valid_partial_refund.json",
+      "kind": "positive",
+      "description": "A genuine partial-refund case matching the scenario the generator injects. Ledger status is 'partially_refunded', so status corroborates. Arithmetic: gross(3000.00) - fee_charged(70.80) - refund(500.00) = 2429.20 = settled_amount. Guard accepts.",
+      "llm_claim_category": "PARTIAL_REFUND",
+      "llm_reconciles": true,
+      "llm_claim": {
+        "refund_amount": "500.00"
+      },
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_final_category": "PARTIAL_REFUND",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "checks": [
+        {
+          "name": "order_exists",
+          "passed": true,
+          "detail": "order ORD-POSPR"
+        },
+        {
+          "name": "ledger_status_supports_refund",
+          "passed": true,
+          "detail": "order.status = 'partially_refunded' (expected 'partially_refunded' or 'refunded')"
+        },
+        {
+          "name": "payout_count",
+          "passed": true,
+          "detail": "exactly 1 in-window payout"
+        },
+        {
+          "name": "refund_amount_provided",
+          "passed": true,
+          "detail": "claim.refund_amount = Rs.500.00"
+        },
+        {
+          "name": "refund_amount_non_negative",
+          "passed": true,
+          "detail": "refund Rs.500.00"
+        },
+        {
+          "name": "refund_arithmetic_closes",
+          "passed": true,
+          "detail": "gross Rs.3000.00 - fee_charged Rs.70.80 - refund Rs.500.00 = Rs.2429.20; settled Rs.2429.20; gap Rs.0.00; tolerance Rs.3.00"
+        }
+      ],
+      "matched_expectation": true
+    },
+    {
+      "fixture": "positive_valid_split.json",
+      "kind": "positive",
+      "description": "A genuine split payout: two legs summing exactly to net_expected. Note: the deterministic matcher would have handled this on its own (it's a clean split); the scenario here is what a corner case escalation might look like if the matcher missed one — e.g., an aggregator quirk. Guard accepts because all cited leg IDs reference this order's in-window payouts and their settled_amount sums close to net_expected.",
+      "llm_claim_category": "SPLIT_PAYOUT",
+      "llm_reconciles": true,
+      "llm_claim": {
+        "leg_payout_ids": [
+          "PYT-POSSPLITA",
+          "PYT-POSSPLITB"
+        ]
+      },
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_final_category": "SPLIT_PAYOUT",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "checks": [
+        {
+          "name": "order_exists",
+          "passed": true,
+          "detail": "order ORD-POSSPLIT"
+        },
+        {
+          "name": "leg_payout_ids_shape",
+          "passed": true,
+          "detail": "2 leg IDs proposed"
+        },
+        {
+          "name": "all_legs_exist_and_in_window",
+          "passed": true,
+          "detail": "claimed leg IDs ['PYT-POSSPLITA', 'PYT-POSSPLITB'] vs in-window payouts ['PYT-POSSPLITA', 'PYT-POSSPLITB']"
+        },
+        {
+          "name": "leg_sum_closes_to_net",
+          "passed": true,
+          "detail": "sum(legs) Rs.976.40 = Rs.976.40; net_expected Rs.976.40; gap Rs.0.00; tolerance Rs.1.00"
+        }
+      ],
+      "matched_expectation": true
+    }
+  ]
+}

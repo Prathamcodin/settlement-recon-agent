@@ -1,0 +1,43 @@
+{
+  "name": "positive_valid_split",
+  "kind": "positive",
+  "expected_guard": "ACCEPT",
+  "description": "A genuine split payout: two legs summing exactly to net_expected. Note: the deterministic matcher would have handled this on its own (it's a clean split); the scenario here is what a corner case escalation might look like if the matcher missed one — e.g., an aggregator quirk. Guard accepts because all cited leg IDs reference this order's in-window payouts and their settled_amount sums close to net_expected.",
+  "context": {
+    "key": "ORD-POSSPLIT",
+    "matcher_strategy": "split_incomplete",
+    "order": {
+      "order_id": "ORD-POSSPLIT",
+      "gross_amount": "1000.00",
+      "expected_fee": "23.60",
+      "net_expected": "976.40",
+      "status": "captured",
+      "created_at": "2026-08-20T09:00:00+00:00"
+    },
+    "in_window_payouts": [
+      {
+        "payout_id": "PYT-POSSPLITA",
+        "order_ref": "ORD-POSSPLIT",
+        "settled_amount": "585.84",
+        "fee_charged": "14.16",
+        "settled_at": "2026-08-20T13:00:00+00:00",
+        "batch_id": "BATCH-2026-08-20"
+      },
+      {
+        "payout_id": "PYT-POSSPLITB",
+        "order_ref": "ORD-POSSPLIT",
+        "settled_amount": "390.56",
+        "fee_charged": "9.44",
+        "settled_at": "2026-08-20T13:30:00+00:00",
+        "batch_id": "BATCH-2026-08-20"
+      }
+    ],
+    "out_of_window_payouts": []
+  },
+  "llm_response": {
+    "category": "SPLIT_PAYOUT",
+    "reconciles": true,
+    "reasoning": "Two payout legs sum exactly to net_expected.",
+    "claim": {"leg_payout_ids": ["PYT-POSSPLITA", "PYT-POSSPLITB"]}
+  }
+}

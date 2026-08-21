@@ -1,0 +1,35 @@
+{
+  "name": "positive_valid_fee_variance",
+  "kind": "positive",
+  "expected_guard": "ACCEPT",
+  "description": "A genuine fee-variance case, matching the scenario the live batch injects for fee_variance orders. Merchant expected a flat 2% fee (Rs.20.00); aggregator charged 2% + GST (Rs.23.60). Settlement is internally consistent (gross - fee_charged = settled) and the LLM's proposed actual_fee agrees with the payout's fee_charged. Guard accepts.",
+  "context": {
+    "key": "ORD-POSFV",
+    "matcher_strategy": "amount_mismatch",
+    "order": {
+      "order_id": "ORD-POSFV",
+      "gross_amount": "1000.00",
+      "expected_fee": "20.00",
+      "net_expected": "980.00",
+      "status": "captured",
+      "created_at": "2026-08-20T10:00:00+00:00"
+    },
+    "in_window_payouts": [
+      {
+        "payout_id": "PYT-POSFV",
+        "order_ref": "ORD-POSFV",
+        "settled_amount": "976.40",
+        "fee_charged": "23.60",
+        "settled_at": "2026-08-20T14:00:00+00:00",
+        "batch_id": "BATCH-2026-08-20"
+      }
+    ],
+    "out_of_window_payouts": []
+  },
+  "llm_response": {
+    "category": "FEE_VARIANCE",
+    "reconciles": true,
+    "reasoning": "Aggregator charged fee + GST (2.36%) instead of the merchant's expected flat 2%.",
+    "claim": {"actual_fee": "23.60"}
+  }
+}

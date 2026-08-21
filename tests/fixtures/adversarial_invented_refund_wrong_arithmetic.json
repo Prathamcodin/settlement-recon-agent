@@ -1,0 +1,35 @@
+{
+  "name": "adversarial_invented_refund_wrong_arithmetic",
+  "kind": "adversarial",
+  "expected_guard": "REJECT",
+  "description": "Ledger.status IS 'partially_refunded' — so the status check passes. But the LLM's proposed refund_amount does not close the arithmetic against the payout's actual fee_charged. gross(5000.00) - fee_charged(118.00) - refund(150.00) = 4732.00, but settled is 4700.00; gap Rs.32.00 > tolerance Rs.5.00. Guard rejects on the arithmetic. Shows that a correct-status classification still has to survive the numerical check.",
+  "context": {
+    "key": "ORD-TESTREFUND",
+    "matcher_strategy": "amount_mismatch",
+    "order": {
+      "order_id": "ORD-TESTREFUND",
+      "gross_amount": "5000.00",
+      "expected_fee": "118.00",
+      "net_expected": "4882.00",
+      "status": "partially_refunded",
+      "created_at": "2026-08-20T09:00:00+00:00"
+    },
+    "in_window_payouts": [
+      {
+        "payout_id": "PYT-TESTREFUND",
+        "order_ref": "ORD-TESTREFUND",
+        "settled_amount": "4700.00",
+        "fee_charged": "118.00",
+        "settled_at": "2026-08-20T13:00:00+00:00",
+        "batch_id": "BATCH-2026-08-20"
+      }
+    ],
+    "out_of_window_payouts": []
+  },
+  "llm_response": {
+    "category": "PARTIAL_REFUND",
+    "reconciles": true,
+    "reasoning": "The order was partially refunded by Rs.150.00.",
+    "claim": {"refund_amount": "150.00"}
+  }
+}

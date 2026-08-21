@@ -200,7 +200,8 @@ def test_record_calls_backend_and_writes_verbatim(tmp_path):
     # Backend was called exactly once with the user prompt.
     assert len(fake.calls) == 1
     call = fake.calls[0]
-    assert call["max_tokens"] == 1000
+    from src.classifier.classify import MAX_TOKENS
+    assert call["max_tokens"] == MAX_TOKENS
     assert "ORD-77" in call["user"]
     assert "PYT-1" in call["user"] and "PYT-2" in call["user"]
 

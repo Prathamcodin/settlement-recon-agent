@@ -1,0 +1,35 @@
+{
+  "name": "adversarial_selfconsistent_fee_lie",
+  "kind": "adversarial",
+  "expected_guard": "REJECT",
+  "description": "The 'smart lie.' LLM proposes actual_fee=119.80, which makes its own math perfect: gross(4823.00) - actual_fee(119.80) = 4703.20 = settled_amount. Guard rejects because 119.80 disagrees with the settlement row's actual fee_charged (96.46) by Rs.23.34, far outside the Rs.4.82 tolerance for a Rs.4823 gross. This is the pitch talking point: the guard validates against the settlement's own numbers, not against numbers the model produced. Anchored on ORD-0006 from the live batch.",
+  "context": {
+    "key": "ORD-0006",
+    "matcher_strategy": "amount_mismatch",
+    "order": {
+      "order_id": "ORD-0006",
+      "gross_amount": "4823.00",
+      "expected_fee": "96.46",
+      "net_expected": "4726.54",
+      "status": "captured",
+      "created_at": "2026-08-20T12:00:00+00:00"
+    },
+    "in_window_payouts": [
+      {
+        "payout_id": "PYT-0006",
+        "order_ref": "ORD-0006",
+        "settled_amount": "4703.20",
+        "fee_charged": "96.46",
+        "settled_at": "2026-08-20T15:00:00+00:00",
+        "batch_id": "BATCH-2026-08-20"
+      }
+    ],
+    "out_of_window_payouts": []
+  },
+  "llm_response": {
+    "category": "FEE_VARIANCE",
+    "reconciles": true,
+    "reasoning": "The aggregator applied a custom higher fee of Rs.119.80 instead of the expected Rs.96.46. This reconciles: 4823.00 - 119.80 = 4703.20 = settled_amount.",
+    "claim": {"actual_fee": "119.80"}
+  }
+}

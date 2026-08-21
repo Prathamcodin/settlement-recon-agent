@@ -1,0 +1,35 @@
+{
+  "name": "adversarial_fake_timing",
+  "kind": "adversarial",
+  "expected_guard": "REJECT",
+  "description": "LLM claims TIMING_WINDOW while there IS an in-window payout for this order. TIMING means 'settlement cleared outside this batch's window' — by definition there should be zero in-window payouts. Guard rejects because the presence of an in-window row contradicts the timing narrative; the discrepancy is about amounts, not timing.",
+  "context": {
+    "key": "ORD-TESTTIMING",
+    "matcher_strategy": "amount_mismatch",
+    "order": {
+      "order_id": "ORD-TESTTIMING",
+      "gross_amount": "1000.00",
+      "expected_fee": "23.60",
+      "net_expected": "976.40",
+      "status": "captured",
+      "created_at": "2026-08-20T10:00:00+00:00"
+    },
+    "in_window_payouts": [
+      {
+        "payout_id": "PYT-TESTTIMING",
+        "order_ref": "ORD-TESTTIMING",
+        "settled_amount": "900.00",
+        "fee_charged": "23.60",
+        "settled_at": "2026-08-20T14:00:00+00:00",
+        "batch_id": "BATCH-2026-08-20"
+      }
+    ],
+    "out_of_window_payouts": []
+  },
+  "llm_response": {
+    "category": "TIMING_WINDOW",
+    "reconciles": true,
+    "reasoning": "The settlement cleared outside the batch window.",
+    "claim": {"outside_window": true}
+  }
+}
