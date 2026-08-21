@@ -4,23 +4,23 @@ Unit tests for the LLM classifier's plumbing.
 These tests verify record/replay mechanics — they do NOT test whether
 the LLM's classifications are correct (that is measured by
 scripts/capture_before_guard.py against ground_truth.json). Nothing
-here calls the real Anthropic API.
+here calls the real LLM API.
 
 Note the strict split from step 4's guard tests: those tests will use
 hand-crafted LLM-shaped JSON fixtures (in tests/fixtures/) to prove
 the guard rejects bad claims. Those fixtures never mix with
-evidence/llm_raw/. The mocks here are only for exercising the record
-plumbing itself.
+evidence/llm_raw/. The FakeLLMBackend here is only for exercising the
+record plumbing itself.
 """
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from decimal import Decimal
-from types import SimpleNamespace
 
 import pytest
 
+from src.classifier.backend import LLMBackend
 from src.classifier.classify import (
     ClassifiedRecord,
     DEFAULT_EVIDENCE_DIR,
@@ -60,25 +60,32 @@ def _escalation(order_id="ORD-1", strategy="amount_mismatch",
     )
 
 
-# --- Fake anthropic client (only for exercising the record plumbing) -----
+# --- Fake LLM backend (satisfies the LLMBackend Protocol) ---------------
 
-class _FakeMessages:
-    def __init__(self, response_text: str):
+class FakeLLMBackend:
+    """
+    Minimal in-memory backend that returns a canned response.
+    Satisfies LLMBackend structurally; used only for wiring tests.
+    """
+    def __init__(self, response_text: str, system_prompt: str = "FAKE_SYSTEM",
+                 name: str = "fake-llm"):
         self.response_text = response_text
+        self.system_prompt = system_prompt
+        self.name = name
         self.calls: list[dict] = []
 
-    def create(self, **kwargs):
-        self.calls.append(kwargs)
-        return SimpleNamespace(content=[SimpleNamespace(text=self.response_text)])
+    def classify(self, *, user: str, max_tokens: int) -> str:
+        self.calls.append({"user": user, "max_tokens": max_tokens})
+        return self.response_text
 
 
-class FakeAnthropic:
-    """Shape-compatible with anthropic.Anthropic — just enough for classify_one."""
-    def __init__(self, response_text: str):
-        self.messages = _FakeMessages(response_text)
+def test_fake_backend_satisfies_llmbackend_protocol():
+    """Structural check on the Protocol — cheap smoke test of the seam."""
+    fake = FakeLLMBackend("{}")
+    assert isinstance(fake, LLMBackend)
 
 
-# --- parse_response ------------------------------------------------------
+# --- parse_response -----------------------------------------------------
 
 def test_parse_response_plain_json():
     text = '{"category": "GENUINE_MISMATCH", "reconciles": false, "reasoning": "n/a", "claim": {}}'
@@ -106,13 +113,13 @@ def test_parse_response_invalid_json_propagates():
         parse_response("this is not JSON")
 
 
-# --- build_contexts ------------------------------------------------------
+# --- build_contexts -----------------------------------------------------
 
 def test_build_contexts_filters_matched_and_includes_escalations():
     o1 = _order("ORD-1")
     o2 = _order("ORD-2")
     p1 = _payout("PYT-1", "ORD-1", "976.40", "23.60")
-    p2 = _payout("PYT-2", "ORD-2", "900.00", "23.60")  # gap
+    p2 = _payout("PYT-2", "ORD-2", "900.00", "23.60")
     matched = MatchDecision(key="ORD-1", status="MATCHED", strategy="exact",
                             matched_payout_ids=["PYT-1"])
     escalated = MatchDecision(key="ORD-2", status="UNMATCHED_ESCALATE",
@@ -137,7 +144,7 @@ def test_build_contexts_handles_orphan_payout():
     assert ctxs[0].in_window_payouts == [p]
 
 
-# --- replay mode ---------------------------------------------------------
+# --- replay mode --------------------------------------------------------
 
 def test_replay_reads_recorded_response(tmp_path):
     ctx = build_contexts([_escalation("ORD-42")],
@@ -168,7 +175,7 @@ def test_replay_missing_response_raises(tmp_path):
 
 # --- record mode --------------------------------------------------------
 
-def test_record_calls_client_and_writes_verbatim(tmp_path):
+def test_record_calls_backend_and_writes_verbatim(tmp_path):
     ctx = build_contexts([_escalation("ORD-77", strategy="split_incomplete",
                                       matched=["PYT-1", "PYT-2"],
                                       reason="[sum_mismatch] split candidate ...")],
@@ -182,28 +189,27 @@ def test_record_calls_client_and_writes_verbatim(tmp_path):
         "reasoning": "sum off; fee variance across legs",
         "claim": {"leg_payout_ids": ["PYT-1", "PYT-2"], "fee_variance": "71.32"},
     })
-    fake = FakeAnthropic(response_text=canned_response)
+    fake = FakeLLMBackend(response_text=canned_response,
+                          system_prompt="FAKE_SYSTEM", name="fake-llm-v0")
 
-    rec = classify_one(ctx, mode="record", client=fake, evidence_dir=tmp_path)
+    rec = classify_one(ctx, mode="record", backend=fake, evidence_dir=tmp_path)
     assert rec.llm_category == "SPLIT_PAYOUT_WITH_VARIANCE"
     assert rec.llm_reconciles is True
     assert rec.mode == "record"
 
-    # The client was called exactly once with the right shape.
-    assert len(fake.messages.calls) == 1
-    call = fake.messages.calls[0]
-    assert call["model"] == "claude-sonnet-5"
-    assert "You are a settlement reconciliation classifier" in call["system"]
-    assert call["messages"][0]["role"] == "user"
+    # Backend was called exactly once with the user prompt.
+    assert len(fake.calls) == 1
+    call = fake.calls[0]
+    assert call["max_tokens"] == 1000
+    assert "ORD-77" in call["user"]
+    assert "PYT-1" in call["user"] and "PYT-2" in call["user"]
 
-    # The disk record is verbatim and includes both prompts and the raw response.
+    # Disk record is verbatim, backend-agnostic, and carries provenance.
     disk = json.loads((tmp_path / "ORD-77.json").read_text(encoding="utf-8"))
     assert disk["key"] == "ORD-77"
-    assert disk["model"] == "claude-sonnet-5"
+    assert disk["model"] == "fake-llm-v0"
+    assert disk["prompt_system"] == "FAKE_SYSTEM"
     assert disk["response_text"] == canned_response
-    assert disk["prompt_system"].startswith("You are a settlement reconciliation classifier")
-    assert "ORD-77" in disk["prompt_user"]
-    assert "PYT-1" in disk["prompt_user"] and "PYT-2" in disk["prompt_user"]
 
 
 def test_record_orphan_uses_safe_filename(tmp_path):
@@ -215,22 +221,19 @@ def test_record_orphan_uses_safe_filename(tmp_path):
         matched_payout_ids=["PYT-1"],
     )
     ctx = build_contexts([orphan], [], [_payout("PYT-1", None, "500.00", "10.00")])[0]
-    fake = FakeAnthropic(response_text='{"category": "GENUINE_MISMATCH", "reconciles": false, "reasoning": "orphan", "claim": {}}')
-    classify_one(ctx, mode="record", client=fake, evidence_dir=tmp_path)
-    # No colon or angle bracket in the filename
+    fake = FakeLLMBackend(response_text='{"category": "GENUINE_MISMATCH", "reconciles": false, "reasoning": "orphan", "claim": {}}')
+    classify_one(ctx, mode="record", backend=fake, evidence_dir=tmp_path)
     written = list(tmp_path.glob("*.json"))
     assert len(written) == 1
     assert ":" not in written[0].name
     assert "<" not in written[0].name and ">" not in written[0].name
 
 
-# --- record mode requires a client --------------------------------------
-
-def test_record_requires_client(tmp_path):
+def test_record_requires_backend(tmp_path):
     ctx = build_contexts([_escalation("ORD-1")], [_order("ORD-1")],
                          [_payout("PYT-1", "ORD-1", "900.00", "23.60")])[0]
-    with pytest.raises(ValueError, match="anthropic client"):
-        classify_one(ctx, mode="record", client=None, evidence_dir=tmp_path)
+    with pytest.raises(ValueError, match="LLM backend"):
+        classify_one(ctx, mode="record", backend=None, evidence_dir=tmp_path)
 
 
 def test_invalid_mode_raises(tmp_path):

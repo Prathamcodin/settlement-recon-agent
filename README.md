@@ -11,13 +11,19 @@ deterministic logic, and produces an honest exception list for what it can't.
 ```
 1. Deterministic matcher (trusted core, no LLM)
       └── clears the clean majority
-2. LLM exception classifier (bounded, untrusted)
+2. LLM exception classifier (bounded, untrusted)   [Gemini 2.5 Flash]
       └── explains WHY the residue doesn't reconcile
 3. Validation guard (safety layer)
       └── re-checks every LLM claim against hard arithmetic
 4. Reporter + audit trail
       └── match rate, reason codes, per-record log
 ```
+
+The LLM sits behind a small `LLMBackend` Protocol
+([src/classifier/backend.py](src/classifier/backend.py)) so the provider is
+pluggable — the default is Gemini 2.5 Flash (Google's free tier, `GEMINI_API_KEY`),
+but any implementation of the Protocol drops in without touching the prompt,
+the guard, or the reporter.
 
 The LLM never invents a match. Its output is treated as untrusted and gated by
 the validation guard — if the numbers don't support its explanation, the

@@ -1,3 +1,4 @@
+from .backend import GeminiBackend, LLMBackend
 from .classify import (
     ClassifiedRecord,
     EscalationContext,
@@ -11,6 +12,8 @@ from .classify import (
 __all__ = [
     "ClassifiedRecord",
     "EscalationContext",
+    "GeminiBackend",
+    "LLMBackend",
     "build_contexts",
     "classify_escalations",
     "classify_one",

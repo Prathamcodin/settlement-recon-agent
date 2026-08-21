@@ -1,10 +1,15 @@
 """
 LLM exception classifier — layer 2 of the reconciliation pipeline.
 
-Consumes the deterministic matcher's escalations, sends each to Claude
-Sonnet 5, and returns the raw + parsed classification. Bounded and
-UNTRUSTED: no validation happens here. Layer 3 (the guard, added in
-step 4) is responsible for rejecting arithmetically-unsupported claims.
+Consumes the deterministic matcher's escalations, sends each to an
+LLM backend (see src.classifier.backend), and returns the raw + parsed
+classification. Bounded and UNTRUSTED: no validation happens here.
+Layer 3 (the guard, added in step 4) is responsible for rejecting
+arithmetically-unsupported claims.
+
+The concrete LLM is behind the LLMBackend Protocol — the classifier
+never imports google-generativeai, anthropic, openai, or anything else
+provider-specific. Swap the backend to swap the model.
 
 Two operating modes:
 
@@ -14,7 +19,7 @@ Two operating modes:
     CI, and the demo — nobody burns API calls during a walk-through.
 
   record
-    Call the live API, write the verbatim response to
+    Call the live backend, write the verbatim response to
     evidence/llm_raw/<key>.json, and return the parsed classification.
     Run this once (whenever the batch or the prompt changes) to
     (re)build the evidence artifact.
@@ -33,16 +38,16 @@ import argparse
 import json
 import os
 import sys
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
+from src.classifier.backend import LLMBackend
 from src.classifier.prompt import SYSTEM, build_user_prompt
 from src.models import MatchDecision, Order, Payout
 
 
-MODEL_ID = "claude-sonnet-5"
 MAX_TOKENS = 1000
 DEFAULT_EVIDENCE_DIR = Path("evidence/llm_raw")
 
@@ -96,22 +101,21 @@ class ClassifiedRecord:
 
 
 # --------------------------------------------------------------------------
-# JSON parser (best-effort tolerant of stray formatting)
+# JSON parser (tolerant of stray fences some models add)
 # --------------------------------------------------------------------------
 
 def parse_response(raw_text: str) -> dict:
     """
     Parse the model's response into a dict. We asked for strict JSON,
-    but real models sometimes wrap output in code fences or add stray
-    whitespace, so we strip those before json.loads. Any deeper failure
-    should propagate — that IS a data point about model reliability.
+    and Gemini's response_mime_type=application/json usually delivers,
+    but strip code fences defensively — any deeper failure should
+    propagate: an unparseable response IS a data point about model
+    reliability.
     """
     text = raw_text.strip()
     if text.startswith("```"):
         lines = text.split("\n")
-        # drop the opening fence line (```json or ```)
-        lines = lines[1:]
-        # drop the trailing fence if present
+        lines = lines[1:]                        # drop opening fence
         while lines and lines[-1].strip().startswith("```"):
             lines.pop()
         text = "\n".join(lines).strip()
@@ -131,7 +135,7 @@ def classify_one(
     ctx: EscalationContext,
     *,
     mode: str = "replay",
-    client=None,
+    backend: Optional[LLMBackend] = None,
     evidence_dir: Path = DEFAULT_EVIDENCE_DIR,
 ) -> ClassifiedRecord:
     if mode not in ("replay", "record"):
@@ -144,14 +148,14 @@ def classify_one(
         if not disk_path.exists():
             raise FileNotFoundError(
                 f"No recorded response for '{key}' at {disk_path}.\n"
-                f"Re-run in --mode record (requires ANTHROPIC_API_KEY) to capture it."
+                f"Re-run in --mode record (requires GEMINI_API_KEY) to capture it."
             )
         record = json.loads(disk_path.read_text(encoding="utf-8"))
         raw_text = record["response_text"]
 
     else:  # mode == "record"
-        if client is None:
-            raise ValueError("record mode requires an anthropic client instance")
+        if backend is None:
+            raise ValueError("record mode requires an LLM backend instance")
         user_prompt = build_user_prompt(
             order=ctx.order,
             in_pays=ctx.in_window_payouts,
@@ -159,20 +163,14 @@ def classify_one(
             strategy=ctx.decision.strategy,
             matcher_reason=ctx.decision.reason,
         )
-        response = client.messages.create(
-            model=MODEL_ID,
-            max_tokens=MAX_TOKENS,
-            system=SYSTEM,
-            messages=[{"role": "user", "content": user_prompt}],
-        )
-        raw_text = response.content[0].text
+        raw_text = backend.classify(user=user_prompt, max_tokens=MAX_TOKENS)
         disk_path.parent.mkdir(parents=True, exist_ok=True)
         disk_path.write_text(json.dumps({
             "key": key,
             "matcher_strategy": ctx.decision.strategy,
-            "model": MODEL_ID,
+            "model": backend.name,
             "recorded_at": datetime.now(timezone.utc).isoformat(),
-            "prompt_system": SYSTEM,
+            "prompt_system": backend.system_prompt,
             "prompt_user": user_prompt,
             "response_text": raw_text,
         }, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -196,12 +194,12 @@ def classify_escalations(
     payouts: list[Payout],
     *,
     mode: str = "replay",
-    client=None,
+    backend: Optional[LLMBackend] = None,
     evidence_dir: Path = DEFAULT_EVIDENCE_DIR,
 ) -> list[ClassifiedRecord]:
     contexts = build_contexts(decisions, orders, payouts)
     return [
-        classify_one(ctx, mode=mode, client=client, evidence_dir=evidence_dir)
+        classify_one(ctx, mode=mode, backend=backend, evidence_dir=evidence_dir)
         for ctx in contexts
     ]
 
@@ -217,9 +215,9 @@ def _summarize(records: list[ClassifiedRecord]) -> str:
     by_cat = Counter(r.llm_category for r in records)
     lines = [
         "LLM classifier summary (no validation guard applied yet)",
-        f"  total escalations : {total}",
-        f"  LLM says reconciles  : {reconciled}",
-        f"  LLM says exception   : {total - reconciled}",
+        f"  total escalations   : {total}",
+        f"  LLM says reconciles : {reconciled}",
+        f"  LLM says exception  : {total - reconciled}",
         "  category breakdown:",
     ]
     for cat, count in sorted(by_cat.items(), key=lambda x: (-x[1], x[0])):
@@ -227,42 +225,43 @@ def _summarize(records: list[ClassifiedRecord]) -> str:
     return "\n".join(lines)
 
 
+def _build_backend() -> LLMBackend:
+    """Wire up the default backend (Gemini 2.5 Flash) from environment."""
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        sys.exit("GEMINI_API_KEY not set (add to .env or export it)")
+    from src.classifier.backend import GeminiBackend
+    return GeminiBackend(api_key=api_key, system_prompt=SYSTEM)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Classify reconciliation exceptions via LLM.")
     parser.add_argument("--orders", type=Path, default=Path("data/orders_ledger.csv"))
     parser.add_argument("--payouts", type=Path, default=Path("data/settlement_file.csv"))
     parser.add_argument("--mode", choices=["replay", "record"], default="replay",
-                        help="replay = read recorded responses; record = call live API and save.")
+                        help="replay = read recorded responses; record = call live LLM and save.")
     parser.add_argument("--evidence-dir", type=Path, default=DEFAULT_EVIDENCE_DIR)
     args = parser.parse_args()
 
-    # Lazy import so tests / replay mode don't need anthropic installed.
     from src.matcher import load_orders, load_payouts, match_batch
 
     orders = load_orders(args.orders)
     payouts = load_payouts(args.payouts)
     decisions = match_batch(orders, payouts)
 
-    client = None
+    backend = None
     if args.mode == "record":
-        try:
-            import anthropic
-        except ImportError:
-            sys.exit("record mode requires: pip install -r requirements.txt")
-        try:
-            from dotenv import load_dotenv
-            load_dotenv()
-        except ImportError:
-            pass
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
-        if not api_key:
-            sys.exit("ANTHROPIC_API_KEY not set (add to .env or export it)")
-        client = anthropic.Anthropic(api_key=api_key)
-        print(f"[record] using model={MODEL_ID}, writing to {args.evidence_dir}/")
+        backend = _build_backend()
+        print(f"[record] backend={backend.name}, writing to {args.evidence_dir}/")
 
     records = classify_escalations(
         decisions, orders, payouts,
-        mode=args.mode, client=client, evidence_dir=args.evidence_dir,
+        mode=args.mode, backend=backend, evidence_dir=args.evidence_dir,
     )
     print(_summarize(records))
 

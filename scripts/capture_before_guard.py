@@ -37,6 +37,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.classifier.classify import (
     DEFAULT_EVIDENCE_DIR,
+    _build_backend,
     classify_escalations,
 )
 from src.matcher.match import load_orders, load_payouts, match_batch
@@ -99,22 +100,6 @@ def _score(records, ground_truth):
     return correct, false_recon, wrong_cat
 
 
-def _get_client():
-    try:
-        import anthropic
-    except ImportError:
-        sys.exit("record mode requires: pip install -r requirements.txt")
-    try:
-        from dotenv import load_dotenv
-        load_dotenv()
-    except ImportError:
-        pass
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        sys.exit("ANTHROPIC_API_KEY not set (add to .env or export it)")
-    return anthropic.Anthropic(api_key=api_key)
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Capture evidence/before_guard.json.")
     parser.add_argument("--orders", type=Path, default=Path("data/orders_ledger.csv"))
@@ -130,13 +115,13 @@ def main() -> None:
     decisions = match_batch(orders, payouts)
     ground_truth = _load_ground_truth(args.ground_truth)
 
-    client = _get_client() if args.mode == "record" else None
+    backend = _build_backend() if args.mode == "record" else None
     if args.mode == "record":
-        print(f"[record] live API call incoming for each escalation, writing to {args.evidence_dir}/")
+        print(f"[record] backend={backend.name}, writing verbatim to {args.evidence_dir}/")
 
     records = classify_escalations(
         decisions, orders, payouts,
-        mode=args.mode, client=client, evidence_dir=args.evidence_dir,
+        mode=args.mode, backend=backend, evidence_dir=args.evidence_dir,
     )
     correct, false_recon, wrong_cat = _score(records, ground_truth)
 
