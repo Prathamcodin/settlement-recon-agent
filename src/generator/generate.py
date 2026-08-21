@@ -25,6 +25,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from typing import Callable, Optional
 
+from src.models import Order, Payout
 from src.tolerance import rounding_tolerance
 
 # --------------------------------------------------------------------------
@@ -67,28 +68,8 @@ SCENARIO_MIX = {
 
 
 # --------------------------------------------------------------------------
-# Domain types
+# Domain types (generator-only; Order and Payout live in src.models)
 # --------------------------------------------------------------------------
-
-@dataclass
-class Order:
-    order_id: str
-    gross_amount: Decimal
-    expected_fee: Decimal
-    net_expected: Decimal
-    status: str
-    created_at: datetime
-
-
-@dataclass
-class Payout:
-    payout_id: str
-    order_ref: Optional[str]
-    settled_amount: Decimal
-    fee_charged: Decimal
-    settled_at: datetime
-    batch_id: str
-
 
 @dataclass
 class GroundTruth:
@@ -130,18 +111,40 @@ def _make_id_factory(prefix: str) -> Callable[[], str]:
 
 
 def _make_time_factory(rng: random.Random) -> tuple[Callable[[], datetime], Callable[[datetime], datetime]]:
-    def random_created_at() -> datetime:
-        # Orders happen 1h–49h before the recon cutoff, so their
-        # settlements land inside the 24h window (with room for
-        # 15min–6h processing lag).
-        delta_seconds = rng.randint(3600, 49 * 3600)
-        return RECON_DATE - timedelta(seconds=delta_seconds)
+    """
+    Return (pick_settled_in_window, pick_created_before).
 
-    def random_settled_at(created_at: datetime) -> datetime:
+    Order matters: we pick settled_at FIRST, uniformly inside the window
+    with a 1h buffer from RECON_DATE (so a split's second leg + 30-45min
+    still lands in-window). Then we pick created_at 15min-6h before that.
+
+    Earlier, we did it the other way — picked created_at up to 49h before
+    RECON, then added lag — and 40%+ of settlements ended up outside the
+    window because the created_at range was wider than the window.
+    """
+    _WINDOW_START = RECON_DATE - WINDOW
+    _MARGIN_FROM_START = timedelta(minutes=15)
+    _MARGIN_FROM_END = timedelta(hours=1)      # headroom for split legs
+
+    _span_seconds = int(((RECON_DATE - _MARGIN_FROM_END) -
+                         (_WINDOW_START + _MARGIN_FROM_START)).total_seconds())
+
+    def pick_settled_in_window() -> datetime:
+        offset = rng.randint(0, _span_seconds)
+        return _WINDOW_START + _MARGIN_FROM_START + timedelta(seconds=offset)
+
+    def pick_created_before(settled_at: datetime) -> datetime:
         lag = timedelta(seconds=rng.randint(15 * 60, 6 * 3600))
-        return created_at + lag
+        return settled_at - lag
 
-    return random_created_at, random_settled_at
+    return pick_settled_in_window, pick_created_before
+
+
+def _pick_times(times) -> tuple[datetime, datetime]:
+    """(created_at, settled_at) — settled_at guaranteed in-window."""
+    settled_at = times[0]()
+    created_at = times[1](settled_at)
+    return created_at, settled_at
 
 
 # --------------------------------------------------------------------------
@@ -167,9 +170,8 @@ def _clean_order(rng, next_order, created_at) -> Order:
 
 
 def build_clean(rng, next_order, next_payout, times):
-    created_at, settled_at = times[0](), None
+    created_at, settled_at = _pick_times(times)
     o = _clean_order(rng, next_order, created_at)
-    settled_at = times[1](o.created_at)
     p = Payout(
         payout_id=next_payout(),
         order_ref=o.order_id,
@@ -191,7 +193,7 @@ def build_fee_variance(rng, next_order, next_payout, times):
     gross = money(Decimal(rng.randint(10000, 500000)) / 100)
     expected_fee_flat = money(gross * FEE_RATES[method])          # ledger view
     actual_fee_gst = _fee_with_gst(gross, FEE_RATES[method])       # settlement view
-    created_at = times[0]()
+    created_at, settled_at = _pick_times(times)
     o = Order(
         order_id=next_order(),
         gross_amount=gross,
@@ -205,7 +207,7 @@ def build_fee_variance(rng, next_order, next_payout, times):
         order_ref=o.order_id,
         settled_amount=money(gross - actual_fee_gst),
         fee_charged=actual_fee_gst,
-        settled_at=times[1](o.created_at),
+        settled_at=settled_at,
         batch_id=BATCH_ID,
     )
     gt = GroundTruth(o.order_id, "FEE_VARIANCE", "fee_variance",
@@ -216,7 +218,7 @@ def build_fee_variance(rng, next_order, next_payout, times):
 def build_rounding(rng, next_order, next_payout, times):
     # Inject a drift that is guaranteed to fall inside the principled
     # tolerance, so the deterministic matcher should still MATCH.
-    created_at = times[0]()
+    created_at, settled_at = _pick_times(times)
     o = _clean_order(rng, next_order, created_at)
     tol = rounding_tolerance(o.gross_amount)
     # Drift ∈ [-tol, +tol], excluding zero.
@@ -230,7 +232,7 @@ def build_rounding(rng, next_order, next_payout, times):
         order_ref=o.order_id,
         settled_amount=money(o.net_expected + drift),
         fee_charged=o.expected_fee,
-        settled_at=times[1](o.created_at),
+        settled_at=settled_at,
         batch_id=BATCH_ID,
     )
     gt = GroundTruth(o.order_id, "MATCHED", "rounding",
@@ -241,9 +243,8 @@ def build_rounding(rng, next_order, next_payout, times):
 def build_split_payout_clean(rng, next_order, next_payout, times):
     # One order → two payout rows summing exactly to net_expected.
     # Deterministic matcher must group by order_ref and sum.
-    created_at = times[0]()
+    created_at, settled_at = _pick_times(times)
     o = _clean_order(rng, next_order, created_at)
-    settled_at = times[1](o.created_at)
     split1_settled = money(o.net_expected * Decimal("0.6"))
     split2_settled = money(o.net_expected - split1_settled)     # exact by construction
     split1_fee = money(o.expected_fee * Decimal("0.6"))
@@ -261,7 +262,7 @@ def build_split_payout_messy(rng, next_order, next_payout, times):
     # net_expected (gap far outside tolerance). The deterministic matcher
     # must escalate to the LLM. Ground-truth classification is a split
     # with a fee variance — the LLM should recognize both.
-    created_at = times[0]()
+    created_at, settled_at = _pick_times(times)
     gross = money(Decimal("6300.00"))
     fee = _fee_with_gst(gross, FEE_RATES["card"])          # 148.68
     o = Order(
@@ -272,7 +273,6 @@ def build_split_payout_messy(rng, next_order, next_payout, times):
         status="captured",
         created_at=created_at,
     )
-    settled_at = times[1](o.created_at)
     # Deliberately off: sum(settled) = 5900, sum(fee) = 180, total = 6080
     # vs gross 6300 → unexplained gap of ₹71.32 relative to net.
     p1 = Payout(next_payout(), o.order_id, money("3500.00"), money("80.00"),
@@ -292,7 +292,7 @@ def build_partial_refund(rng, next_order, next_payout, times):
     gross = money(Decimal(rng.randint(50000, 500000)) / 100)   # ₹500 – ₹5000
     expected_fee = _fee_with_gst(gross, FEE_RATES[method])
     refund_amount = money(gross * Decimal(rng.choice(["0.2", "0.3", "0.5"])))
-    created_at = times[0]()
+    created_at, settled_at = _pick_times(times)
     o = Order(
         order_id=next_order(),
         gross_amount=gross,
@@ -306,7 +306,7 @@ def build_partial_refund(rng, next_order, next_payout, times):
         order_ref=o.order_id,
         settled_amount=money(gross - expected_fee - refund_amount),
         fee_charged=expected_fee,
-        settled_at=times[1](o.created_at),
+        settled_at=settled_at,
         batch_id=BATCH_ID,
     )
     gt = GroundTruth(o.order_id, "PARTIAL_REFUND", "partial_refund",
@@ -317,7 +317,9 @@ def build_partial_refund(rng, next_order, next_payout, times):
 def build_timing_window(rng, next_order, next_payout, times):
     # Order created in-window, but settlement lands AFTER the cutoff, so
     # this batch's file doesn't contain it. The next batch will.
-    created_at = times[0]()
+    # (We use _pick_times to consume RNG in the same shape as other
+    # scenarios, then discard the picked settled_at.)
+    created_at, _ = _pick_times(times)
     o = _clean_order(rng, next_order, created_at)
     p = Payout(
         payout_id=next_payout(),
@@ -381,7 +383,7 @@ _near_miss_iter = iter(_NEAR_MISSES)
 
 def build_genuine_mismatch_near_miss(rng, next_order, next_payout, times):
     spec = next(_near_miss_iter)
-    created_at = times[0]()
+    created_at, settled_at = _pick_times(times)
     o = Order(
         order_id=next_order(),
         gross_amount=spec["gross"],
@@ -395,7 +397,7 @@ def build_genuine_mismatch_near_miss(rng, next_order, next_payout, times):
         order_ref=o.order_id,
         settled_amount=spec["settled_amount"],
         fee_charged=spec["fee_charged"],
-        settled_at=times[1](o.created_at),
+        settled_at=settled_at,
         batch_id=BATCH_ID,
     )
     gt = GroundTruth(o.order_id, "GENUINE_MISMATCH", "genuine_mismatch_near_miss",
