@@ -31,19 +31,30 @@ classification is rejected.
 
 ## Status
 
-- [x] Step 1: Synthetic data generator + ground truth
-- [ ] Step 2: Deterministic matcher + tests
-- [ ] Step 3: LLM classifier (pre-guard) + `evidence/before_guard.json`
+- [x] Step 1: Synthetic data generator + ground truth (seed=42, 63 records)
+- [x] Step 2: Deterministic matcher + tests (51/63 auto-matched, 81%)
+- [x] Step 3: LLM classifier + live-recorded `evidence/before_guard.json`
+      (Gemini 3.6 Flash, 11/12 correct, 0 false reconciliations)
 - [ ] Step 4: Validation guard + tests + `evidence/after_guard.json`
 - [ ] Step 5: Reporter + FastAPI + CLI
 - [ ] Step 6: Dockerize + full README
 
-## Run (step 1)
+## Safety thesis
+
+The live batch on `gemini-3.6-flash` produced zero false reconciliations. That
+is the honest result and we do not tune the prompt to force a failure. **The
+guard exists as defense-in-depth**: 11/12 correct is not a scale-safe number,
+and one wrong auto-reconcile moves real money. The guard re-checks every LLM
+claim against hard arithmetic and ledger evidence before accepting it. Its
+correctness is proven by [tests/test_guard.py](tests/test_guard.py) against
+hand-crafted adversarial LLM-shaped fixtures in
+[tests/fixtures/](tests/fixtures/) — the false reconciliations we did not
+observe live but must reject if they ever appear.
+
+## Run (through step 3)
 
 ```bash
 python -m src.generator --seed 42 --out data/
+python -m src.matcher --orders data/orders_ledger.csv --payouts data/settlement_file.csv
+python scripts/capture_before_guard.py            # replay-mode; no API calls
 ```
-
-Produces `data/orders_ledger.csv`, `data/settlement_file.csv`, and
-`data/ground_truth.json` (the last is read only by tests / final accuracy
-report, never by the reconciler itself).

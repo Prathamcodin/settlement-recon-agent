@@ -48,7 +48,7 @@ from src.classifier.prompt import SYSTEM, build_user_prompt
 from src.models import MatchDecision, Order, Payout
 
 
-MAX_TOKENS = 1000
+MAX_TOKENS = 4000    # Gemini 3.x uses thinking tokens against this budget; keep it roomy.
 DEFAULT_EVIDENCE_DIR = Path("evidence/llm_raw")
 
 

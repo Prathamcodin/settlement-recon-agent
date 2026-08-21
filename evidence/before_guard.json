@@ -1,0 +1,160 @@
+{
+  "generated_at": "2026-08-21T17:48:50.281838+00:00",
+  "phase": "before_guard",
+  "guard_applied": false,
+  "batch_summary": {
+    "total_records": 63,
+    "matched_deterministic": 51,
+    "escalated_to_llm": 12
+  },
+  "llm_summary": {
+    "reconciled_by_llm": 8,
+    "confirmed_exception_by_llm": 4
+  },
+  "accuracy_vs_ground_truth": {
+    "correct": 11,
+    "false_reconciliations": 0,
+    "wrong_category": 1
+  },
+  "false_reconciliations": [],
+  "wrong_category": [
+    {
+      "key": "ORD-0043",
+      "matcher_strategy": "split_incomplete",
+      "ground_truth_category": "SPLIT_PAYOUT_WITH_VARIANCE",
+      "ground_truth_scenario": "split_payout_messy",
+      "llm_category": "GENUINE_MISMATCH",
+      "llm_reconciles": false,
+      "llm_reasoning": "The sum of the payout legs and charged fees does not account for the order's gross amount, leaving an unexplained discrepancy.",
+      "llm_claim": {}
+    }
+  ],
+  "correct": [
+    {
+      "key": "ORD-0006",
+      "matcher_strategy": "amount_mismatch",
+      "ground_truth_category": "GENUINE_MISMATCH",
+      "ground_truth_scenario": "genuine_mismatch_near_miss",
+      "llm_category": "GENUINE_MISMATCH",
+      "llm_reconciles": false,
+      "llm_reasoning": "The payout row is internally inconsistent as gross amount minus fee charged does not equal settled amount.",
+      "llm_claim": {}
+    },
+    {
+      "key": "ORD-0007",
+      "matcher_strategy": "amount_mismatch",
+      "ground_truth_category": "PARTIAL_REFUND",
+      "ground_truth_scenario": "partial_refund",
+      "llm_category": "PARTIAL_REFUND",
+      "llm_reconciles": true,
+      "llm_reasoning": "The settled amount reflects a partial refund of Rs.698.63 from the net expected amount, matching the partially_refunded ledger status.",
+      "llm_claim": {
+        "refund_amount": "698.63"
+      }
+    },
+    {
+      "key": "ORD-0011",
+      "matcher_strategy": "amount_mismatch",
+      "ground_truth_category": "GENUINE_MISMATCH",
+      "ground_truth_scenario": "genuine_mismatch_near_miss",
+      "llm_category": "GENUINE_MISMATCH",
+      "llm_reconciles": false,
+      "llm_reasoning": "The payout settled amount of Rs.8600.00 does not match net expected Rs.8733.90 and lacks internal consistency with the reported fee.",
+      "llm_claim": {}
+    },
+    {
+      "key": "ORD-0019",
+      "matcher_strategy": "amount_mismatch",
+      "ground_truth_category": "FEE_VARIANCE",
+      "ground_truth_scenario": "fee_variance",
+      "llm_category": "FEE_VARIANCE",
+      "llm_reconciles": true,
+      "llm_reasoning": "The settlement row is internally consistent with gross minus actual fee, but the aggregator charged Rs.63.42 instead of the expected Rs.53.75 fee.",
+      "llm_claim": {
+        "actual_fee": "63.42"
+      }
+    },
+    {
+      "key": "ORD-0020",
+      "matcher_strategy": "amount_mismatch",
+      "ground_truth_category": "FEE_VARIANCE",
+      "ground_truth_scenario": "fee_variance",
+      "llm_category": "FEE_VARIANCE",
+      "llm_reconciles": true,
+      "llm_reasoning": "The payout is internally consistent, reflecting an actual fee of Rs. 108.91 instead of the expected Rs. 92.29.",
+      "llm_claim": {
+        "actual_fee": "108.91"
+      }
+    },
+    {
+      "key": "ORD-0033",
+      "matcher_strategy": "amount_mismatch",
+      "ground_truth_category": "PARTIAL_REFUND",
+      "ground_truth_scenario": "partial_refund",
+      "llm_category": "PARTIAL_REFUND",
+      "llm_reconciles": true,
+      "llm_reasoning": "The order was partially refunded by Rs.120.42, reducing the gross settled amount to Rs.481.69 and resulting in a net payout of Rs.478.14.",
+      "llm_claim": {
+        "refund_amount": "120.42"
+      }
+    },
+    {
+      "key": "ORD-0040",
+      "matcher_strategy": "amount_mismatch",
+      "ground_truth_category": "FEE_VARIANCE",
+      "ground_truth_scenario": "fee_variance",
+      "llm_category": "FEE_VARIANCE",
+      "llm_reconciles": true,
+      "llm_reasoning": "The payout is internally consistent, with an actual fee of Rs. 27.25 charged instead of the expected Rs. 23.09.",
+      "llm_claim": {
+        "actual_fee": "27.25"
+      }
+    },
+    {
+      "key": "ORD-0045",
+      "matcher_strategy": "amount_mismatch",
+      "ground_truth_category": "FEE_VARIANCE",
+      "ground_truth_scenario": "fee_variance",
+      "llm_category": "FEE_VARIANCE",
+      "llm_reconciles": true,
+      "llm_reasoning": "The payout is internally consistent with a higher fee charged of Rs.29.61 instead of the expected Rs.25.09.",
+      "llm_claim": {
+        "actual_fee": "29.61"
+      }
+    },
+    {
+      "key": "ORD-0054",
+      "matcher_strategy": "all_payouts_out_of_window",
+      "ground_truth_category": "TIMING_WINDOW",
+      "ground_truth_scenario": "timing_window",
+      "llm_category": "TIMING_WINDOW",
+      "llm_reconciles": true,
+      "llm_reasoning": "The order settlement cleared outside the current reconciliation window and is assigned to a later batch.",
+      "llm_claim": {
+        "outside_window": true
+      }
+    },
+    {
+      "key": "ORD-0059",
+      "matcher_strategy": "amount_mismatch",
+      "ground_truth_category": "FEE_VARIANCE",
+      "ground_truth_scenario": "fee_variance",
+      "llm_category": "FEE_VARIANCE",
+      "llm_reconciles": true,
+      "llm_reasoning": "The payout is internally consistent, reflecting an actual fee charged of Rs.69.25 instead of the expected Rs.58.68.",
+      "llm_claim": {
+        "actual_fee": "69.25"
+      }
+    },
+    {
+      "key": "ORD-9824",
+      "matcher_strategy": "orphan_payout",
+      "ground_truth_category": "GENUINE_MISMATCH",
+      "ground_truth_scenario": "genuine_mismatch_orphan",
+      "llm_category": "GENUINE_MISMATCH",
+      "llm_reconciles": false,
+      "llm_reasoning": "Payout PYT-0049 references order_ref 'ORD-9824' which does not exist in the merchant ledger.",
+      "llm_claim": {}
+    }
+  ]
+}

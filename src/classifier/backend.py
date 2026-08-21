@@ -34,53 +34,55 @@ class LLMBackend(Protocol):
 
 class GeminiBackend:
     """
-    Google Gemini backend (google-generativeai SDK).
+    Google Gemini backend (google-genai SDK, the currently supported one).
 
-    Default model is gemini-2.5-flash, available on Google's free tier.
-    The system prompt is baked into the underlying GenerativeModel at
-    construction (Gemini takes system_instruction at model-init, not
-    per-call). response_mime_type is set to application/json so the
-    provider enforces JSON output at the API level — matches the
-    strict-JSON contract already in the prompt.
+    Default model is gemini-3.6-flash, the current free-tier flash model
+    on Google AI Studio (gemini-2.5-flash was retired for new users).
+    response_mime_type is set to application/json so the provider enforces
+    JSON output at the API level — this matches the strict-JSON contract
+    already stated in the prompt without leading the model toward any
+    particular answer.
     """
 
-    DEFAULT_MODEL_ID = "gemini-2.5-flash"
+    DEFAULT_MODEL_ID = "gemini-3.6-flash"
 
     def __init__(self, api_key: str, system_prompt: str,
                  model_id: str = DEFAULT_MODEL_ID):
         try:
-            import google.generativeai as genai
+            from google import genai
         except ImportError as e:
             raise ImportError(
-                "GeminiBackend needs the google-generativeai package. "
+                "GeminiBackend needs the google-genai package. "
                 "Install with: pip install -r requirements.txt"
             ) from e
-        genai.configure(api_key=api_key)
         self.name = model_id
         self.system_prompt = system_prompt
-        self._model = genai.GenerativeModel(
-            model_id,
-            system_instruction=system_prompt,
-        )
+        self._model_id = model_id
+        self._client = genai.Client(api_key=api_key)
 
     def classify(self, *, user: str, max_tokens: int) -> str:
-        resp = self._model.generate_content(
-            user,
-            generation_config={
-                "max_output_tokens": max_tokens,
-                "response_mime_type": "application/json",
-            },
+        from google.genai import types
+        config = types.GenerateContentConfig(
+            system_instruction=self.system_prompt,
+            max_output_tokens=max_tokens,
+            response_mime_type="application/json",
         )
-        try:
-            return resp.text
-        except (ValueError, AttributeError) as e:
-            # No usable text — surface the finish_reason so callers know
-            # whether this was safety-blocking, truncation, or something else.
+        resp = self._client.models.generate_content(
+            model=self._model_id,
+            contents=user,
+            config=config,
+        )
+        text = resp.text
+        if not text:
+            # Surface the finish_reason so callers know whether this was
+            # safety-blocking, truncation, or something else. We want the
+            # unusual outcome recorded, not masked.
             finish_reason = None
             try:
                 finish_reason = resp.candidates[0].finish_reason.name
             except Exception:
                 pass
             raise RuntimeError(
-                f"Gemini returned no usable text (finish_reason={finish_reason})"
-            ) from e
+                f"Gemini returned empty text (finish_reason={finish_reason})"
+            )
+        return text
