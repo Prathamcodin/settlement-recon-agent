@@ -1,0 +1,25 @@
+# Two services, both built from the same image.
+#
+#   docker compose up
+#     -> runs the full pipeline once and prints the summary to stdout.
+#        No API key. No network. Matches the fresh-clone / no-key path
+#        verified in step 5.
+#
+#   docker compose --profile api up
+#     -> additionally starts the FastAPI /reconcile service on :8000.
+#        Classifier is replay-only; matcher and guard run live on
+#        uploaded CSVs.
+#
+services:
+  agent:
+    build: .
+    image: recon-agent:latest
+    # Inherits the Dockerfile CMD (python run.py).
+
+  api:
+    build: .
+    image: recon-agent:latest
+    command: ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    profiles: ["api"]
