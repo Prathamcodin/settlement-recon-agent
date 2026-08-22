@@ -24,7 +24,9 @@ python run.py
 
 Regenerates data from the seeded generator, runs the deterministic matcher,
 replays the 12 committed LLM recordings, runs the guard, prints the summary.
-Python 3.11 stdlib only — no `.env`, no third-party pip installs required.
+Requires `pip install -r requirements.txt` (Python 3.11+), but **no API key
+and no network calls are needed at runtime** — the classifier replays from
+the committed recordings in `evidence/llm_raw/`.
 
 Docker:
 
@@ -274,7 +276,7 @@ python -m pytest tests/
 
 ## Build story
 
-Six git commits tell the build history:
+Eight git commits tell the build history:
 
 ```
 89f048e  Step 1: synthetic data generator + ground truth
@@ -289,6 +291,7 @@ ded70d2  Step 3b: live LLM capture (Gemini 3.6 Flash) + honest framing
          (google-generativeai -> google-genai).
 324f31a  Step 4: validation guard + adversarial fixtures + after_guard.json
 8d695a8  Step 5: reporter + run.py + FastAPI /reconcile
+db1f261  Step 6: Dockerize + full README
 ```
 
 Each step passes its own tests and is checkoutable independently.
