@@ -1,7 +1,7 @@
 # Settlement Reconciliation Agent
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests 49 passing](https://img.shields.io/badge/tests-49_passing-brightgreen.svg)](tests/)
+[![Tests 53 passing](https://img.shields.io/badge/tests-53_passing-brightgreen.svg)](tests/)
 [![Razorpay Buildathon — Track 04](https://img.shields.io/badge/Razorpay_Buildathon-Track_04-orange.svg)](#)
 
 Matches merchant orders against aggregator settlements, auto-reconciles the clean
@@ -184,6 +184,46 @@ changes anywhere else.
 - **[evidence/llm_raw/](evidence/llm_raw/)** — 12 verbatim recordings from the
   live capture, one JSON per escalation. Never hand-edited. Strictly separate
   from `tests/fixtures/` (see [evidence/llm_raw/README.md](evidence/llm_raw/README.md)).
+- **[evidence/heldout_guard.json](evidence/heldout_guard.json)** — held-out
+  adversarial stress test (see next section): 170/170 mechanically-generated
+  smart lies rejected and 80/80 legitimate positive controls accepted across
+  140 randomized records at seed=1337.
+
+## Held-out adversarial stress test
+
+Complementary evidence to `after_guard.json` (which uses the ten hand-authored
+fixtures). This suite proves the guard on data **the author did not choose**:
+
+- **Randomized records** — a distinct seed (`1337`, vs the main batch's `42`),
+  randomized gross amounts, randomized fee rates drawn from a realistic table,
+  randomized which-scenario. 140 records generated.
+- **Mechanically synthesized lies** — for each unresolvable record, the
+  generator produces the arithmetically-self-consistent smart lie
+  parametrically: `actual_fee = gross − settled` (so `gross − actual_fee ==
+  settled` balances perfectly) but contradicts the settlement row's real
+  `fee_charged`. Also: wrong-status refund lies, ghost-split lies, orphan
+  claims. 170 adversarial cases.
+- **Positive controls** — 80 legitimate cases (30 fee-variance, 30 partial-
+  refund, 20 splits) prove the guard is not simply rejecting everything.
+
+The suite pipes every case through the actual guard
+([src/guard/verify.py](src/guard/verify.py), unchanged) and asserts the
+verdict.
+
+**Result on the current guard**: 170/170 adversarial rejected, 80/80 legit
+accepted. See [evidence/heldout_guard.json](evidence/heldout_guard.json) for
+the per-case audit trail.
+
+**Scope statement (honest).** This stress-tests the *modeled dangerous-lie
+class* — arithmetically-self-consistent fabrications that contradict the
+settlement row, ledger-status refutations, ghost-leg splits, and orphan
+claims — across randomized inputs. It does **not** claim to cover every
+possible novel lie type. Categories the guard cannot verify at all fail
+closed: an unknown category is always rejected, on principle (see the
+`known_category` check in `src/guard/verify.py`).
+
+Regenerate any time with `python scripts/capture_heldout_guard.py` (no key,
+no network, ~0.05s).
 
 ## Recording new evidence (advanced)
 
@@ -234,7 +274,7 @@ model says next. Recording new evidence remains a CLI operation
 python -m pytest tests/
 ```
 
-**49 tests, all green.** Coverage by layer:
+**53 tests, all green.** Coverage by layer:
 
 | Suite | Tests | What they prove |
 |---|---|---|
@@ -243,6 +283,7 @@ python -m pytest tests/
 | `test_guard.py` | 15 | Parametrized over every fixture (adversarial rejected, positive accepted), smart-lie reason string, reconciles=false counterfactual logging, unknown-category rejection |
 | `test_reporter.py` | 4 | Report shape, guard-reject rendering, **two-labeled-facts invariant** (Live batch and Guard test as separate lines), graceful missing-evidence handling |
 | `test_api.py` | 4 | Root advertises replay-only, `GET /reconcile/sample` returns stable numbers, `POST /reconcile` round-trips uploads, replay-miss returns 422 |
+| `test_heldout_guard.py` | 4 | Held-out suite generates >=100 adversarial + >=30 legit cases, guard rejects all 170 mechanically-generated smart lies at seed=1337, guard accepts all 80 legitimate positive controls, seed reproducibility |
 
 ## What we deliberately did NOT do
 

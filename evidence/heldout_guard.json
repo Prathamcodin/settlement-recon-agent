@@ -1,0 +1,3730 @@
+{
+  "generated_at": "2026-08-23T07:37:12.769195+00:00",
+  "phase": "heldout_guard",
+  "note": "Held-out stress test of the validation guard. Records were generated with a random seed distinct from the main batch and none of the numbers were hand-authored; lies were mechanically synthesized. Scope: exercises the modeled dangerous-lie class across randomized inputs. Does not claim to cover every possible novel lie type. Categories the guard cannot verify fail closed.",
+  "seed": 1337,
+  "records_generated": 140,
+  "cases_total": 250,
+  "adversarial": {
+    "total": 170,
+    "rejected_by_guard": 170,
+    "false_positives": 0
+  },
+  "legit": {
+    "total": 80,
+    "accepted_by_guard": 80,
+    "false_rejections": 0
+  },
+  "outcomes": [
+    {
+      "case_id": "HELDOUT-0000-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.4675.57 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.793.55 by Rs.3882.02 (> tolerance Rs.44.83). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00001",
+      "llm_claim": {
+        "actual_fee": "4675.57"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0000-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00001",
+      "llm_claim": {
+        "refund_amount": "3882.02"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0000-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00001']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00001",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0001-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.4378.03 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.571.49 by Rs.3806.54 (> tolerance Rs.32.29). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00002",
+      "llm_claim": {
+        "actual_fee": "4378.03"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0001-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00002",
+      "llm_claim": {
+        "refund_amount": "3806.54"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0001-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00002']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00002",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0002-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.2237.34 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.306.07 by Rs.1931.27 (> tolerance Rs.17.29). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00003",
+      "llm_claim": {
+        "actual_fee": "2237.34"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0002-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00003",
+      "llm_claim": {
+        "refund_amount": "1931.27"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0002-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00003']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00003",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0003-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.5837.21 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.503.23 by Rs.5333.98 (> tolerance Rs.33.55). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00004",
+      "llm_claim": {
+        "actual_fee": "5837.21"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0003-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00004",
+      "llm_claim": {
+        "refund_amount": "5333.98"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0003-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00004']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00004",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0004-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.3895.12 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.600.69 by Rs.3294.43 (> tolerance Rs.33.94). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00005",
+      "llm_claim": {
+        "actual_fee": "3895.12"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0004-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00005",
+      "llm_claim": {
+        "refund_amount": "3294.43"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0004-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00005']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00005",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0005-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.5633.70 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.749.50 by Rs.4884.20 (> tolerance Rs.49.97). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00006",
+      "llm_claim": {
+        "actual_fee": "5633.70"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0005-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00006",
+      "llm_claim": {
+        "refund_amount": "4884.20"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0005-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00006']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00006",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0006-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.5288.65 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.467.59 by Rs.4821.06 (> tolerance Rs.26.42). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00007",
+      "llm_claim": {
+        "actual_fee": "5288.65"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0006-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00007",
+      "llm_claim": {
+        "refund_amount": "4821.06"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0006-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00007']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00007",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0007-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.7431.37 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.690.74 by Rs.6740.63 (> tolerance Rs.46.05). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00008",
+      "llm_claim": {
+        "actual_fee": "7431.37"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0007-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00008",
+      "llm_claim": {
+        "refund_amount": "6740.63"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0007-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00008']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00008",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0008-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.7140.55 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.606.77 by Rs.6533.78 (> tolerance Rs.34.28). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00009",
+      "llm_claim": {
+        "actual_fee": "7140.55"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0008-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00009",
+      "llm_claim": {
+        "refund_amount": "6533.78"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0008-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00009']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00009",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0009-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.94.25 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.27.22 by Rs.67.03 (> tolerance Rs.1.54). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00010",
+      "llm_claim": {
+        "actual_fee": "94.25"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0009-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00010",
+      "llm_claim": {
+        "refund_amount": "67.03"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0009-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00010']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00010",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0010-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.2876.53 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.480.03 by Rs.2396.50 (> tolerance Rs.24.00). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00011",
+      "llm_claim": {
+        "actual_fee": "2876.53"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0010-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00011",
+      "llm_claim": {
+        "refund_amount": "2396.50"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0010-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00011']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00011",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0011-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.3091.05 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.662.78 by Rs.2428.27 (> tolerance Rs.28.08). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00012",
+      "llm_claim": {
+        "actual_fee": "3091.05"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0011-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00012",
+      "llm_claim": {
+        "refund_amount": "2428.27"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0011-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00012']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00012",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0012-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.3749.95 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.517.56 by Rs.3232.39 (> tolerance Rs.25.88). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00013",
+      "llm_claim": {
+        "actual_fee": "3749.95"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0012-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00013",
+      "llm_claim": {
+        "refund_amount": "3232.39"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0012-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00013']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00013",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0013-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.2206.43 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.221.42 by Rs.1985.01 (> tolerance Rs.44.28). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00014",
+      "llm_claim": {
+        "actual_fee": "2206.43"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0013-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00014",
+      "llm_claim": {
+        "refund_amount": "1985.01"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0013-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00014']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00014",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0014-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.10632.60 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.1158.04 by Rs.9474.56 (> tolerance Rs.49.07). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00015",
+      "llm_claim": {
+        "actual_fee": "10632.60"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0014-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00015",
+      "llm_claim": {
+        "refund_amount": "9474.56"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0014-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00015']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00015",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0015-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.8134.19 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.205.01 by Rs.7929.18 (> tolerance Rs.41.00). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00016",
+      "llm_claim": {
+        "actual_fee": "8134.19"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0015-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00016",
+      "llm_claim": {
+        "refund_amount": "7929.18"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0015-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00016']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00016",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0016-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.3593.26 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.846.58 by Rs.2746.68 (> tolerance Rs.47.83). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00017",
+      "llm_claim": {
+        "actual_fee": "3593.26"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0016-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00017",
+      "llm_claim": {
+        "refund_amount": "2746.68"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0016-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00017']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00017",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0017-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.623.68 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.165.69 by Rs.457.99 (> tolerance Rs.11.05). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00018",
+      "llm_claim": {
+        "actual_fee": "623.68"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0017-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00018",
+      "llm_claim": {
+        "refund_amount": "457.99"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0017-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00018']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00018",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0018-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.3232.80 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.382.20 by Rs.2850.60 (> tolerance Rs.16.19). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00019",
+      "llm_claim": {
+        "actual_fee": "3232.80"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0018-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00019",
+      "llm_claim": {
+        "refund_amount": "2850.60"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0018-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00019']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00019",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0019-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.5457.98 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.932.36 by Rs.4525.62 (> tolerance Rs.46.62). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00020",
+      "llm_claim": {
+        "actual_fee": "5457.98"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0019-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00020",
+      "llm_claim": {
+        "refund_amount": "4525.62"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0019-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00020']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00020",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0020-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.468.71 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.87.19 by Rs.381.52 (> tolerance Rs.3.69). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00021",
+      "llm_claim": {
+        "actual_fee": "468.71"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0020-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00021",
+      "llm_claim": {
+        "refund_amount": "381.52"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0020-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00021']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00021",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0021-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.4998.98 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.969.95 by Rs.4029.03 (> tolerance Rs.38.80). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00022",
+      "llm_claim": {
+        "actual_fee": "4998.98"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0021-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00022",
+      "llm_claim": {
+        "refund_amount": "4029.03"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0021-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00022']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00022",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0022-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.3320.41 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.525.04 by Rs.2795.37 (> tolerance Rs.29.66). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00023",
+      "llm_claim": {
+        "actual_fee": "3320.41"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0022-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00023",
+      "llm_claim": {
+        "refund_amount": "2795.37"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0022-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00023']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00023",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0023-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.1311.65 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.271.86 by Rs.1039.79 (> tolerance Rs.11.52). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00024",
+      "llm_claim": {
+        "actual_fee": "1311.65"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0023-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00024",
+      "llm_claim": {
+        "refund_amount": "1039.79"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0023-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00024']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00024",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0024-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.1609.55 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.426.24 by Rs.1183.31 (> tolerance Rs.21.31). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00025",
+      "llm_claim": {
+        "actual_fee": "1609.55"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0024-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00025",
+      "llm_claim": {
+        "refund_amount": "1183.31"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0024-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00025']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00025",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0025-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.2288.55 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.82.09 by Rs.2206.46 (> tolerance Rs.16.42). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00026",
+      "llm_claim": {
+        "actual_fee": "2288.55"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0025-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00026",
+      "llm_claim": {
+        "refund_amount": "2206.46"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0025-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00026']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00026",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0026-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.751.39 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.406.26 by Rs.345.13 (> tolerance Rs.27.08). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00027",
+      "llm_claim": {
+        "actual_fee": "751.39"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0026-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00027",
+      "llm_claim": {
+        "refund_amount": "345.13"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0026-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00027']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00027",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0027-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.6684.26 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.919.97 by Rs.5764.29 (> tolerance Rs.36.80). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00028",
+      "llm_claim": {
+        "actual_fee": "6684.26"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0027-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00028",
+      "llm_claim": {
+        "refund_amount": "5764.29"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0027-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00028']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00028",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0028-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.3836.05 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.603.79 by Rs.3232.26 (> tolerance Rs.30.19). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00029",
+      "llm_claim": {
+        "actual_fee": "3836.05"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0028-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00029",
+      "llm_claim": {
+        "refund_amount": "3232.26"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0028-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00029']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00029",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0029-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.4584.24 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.564.59 by Rs.4019.65 (> tolerance Rs.31.90). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00030",
+      "llm_claim": {
+        "actual_fee": "4584.24"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0029-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00030",
+      "llm_claim": {
+        "refund_amount": "4019.65"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0029-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00030']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00030",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0030-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.1676.29 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.411.02 by Rs.1265.27 (> tolerance Rs.23.22). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00031",
+      "llm_claim": {
+        "actual_fee": "1676.29"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0030-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00031",
+      "llm_claim": {
+        "refund_amount": "1265.27"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0030-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00031']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00031",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0031-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.755.84 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.685.92 by Rs.69.92 (> tolerance Rs.38.75). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00032",
+      "llm_claim": {
+        "actual_fee": "755.84"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0031-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00032",
+      "llm_claim": {
+        "refund_amount": "69.92"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0031-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00032']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00032",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0032-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.3335.23 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.547.20 by Rs.2788.03 (> tolerance Rs.23.19). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00033",
+      "llm_claim": {
+        "actual_fee": "3335.23"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0032-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00033",
+      "llm_claim": {
+        "refund_amount": "2788.03"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0032-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00033']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00033",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0033-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.401.16 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.16.08 by Rs.385.08 (> tolerance Rs.3.22). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00034",
+      "llm_claim": {
+        "actual_fee": "401.16"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0033-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00034",
+      "llm_claim": {
+        "refund_amount": "385.08"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0033-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00034']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00034",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0034-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.7592.90 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.560.57 by Rs.7032.33 (> tolerance Rs.37.37). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00035",
+      "llm_claim": {
+        "actual_fee": "7592.90"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0034-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00035",
+      "llm_claim": {
+        "refund_amount": "7032.33"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0034-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00035']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00035",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0035-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.389.77 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.105.81 by Rs.283.96 (> tolerance Rs.4.48). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00036",
+      "llm_claim": {
+        "actual_fee": "389.77"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0035-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00036",
+      "llm_claim": {
+        "refund_amount": "283.96"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0035-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00036']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00036",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0036-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.1799.49 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.691.19 by Rs.1108.30 (> tolerance Rs.27.65). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00037",
+      "llm_claim": {
+        "actual_fee": "1799.49"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0036-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00037",
+      "llm_claim": {
+        "refund_amount": "1108.30"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0036-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00037']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00037",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0037-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.7685.15 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.879.21 by Rs.6805.94 (> tolerance Rs.49.67). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00038",
+      "llm_claim": {
+        "actual_fee": "7685.15"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0037-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00038",
+      "llm_claim": {
+        "refund_amount": "6805.94"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0037-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00038']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00038",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0038-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.4266.51 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.1111.86 by Rs.3154.65 (> tolerance Rs.47.11). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00039",
+      "llm_claim": {
+        "actual_fee": "4266.51"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0038-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00039",
+      "llm_claim": {
+        "refund_amount": "3154.65"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0038-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00039']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00039",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0039-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.519.73 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.295.62 by Rs.224.11 (> tolerance Rs.12.53). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00040",
+      "llm_claim": {
+        "actual_fee": "519.73"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0039-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00040",
+      "llm_claim": {
+        "refund_amount": "224.11"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0039-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00040']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00040",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0040-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.166.19 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.36.99 by Rs.129.20 (> tolerance Rs.1.85). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00041",
+      "llm_claim": {
+        "actual_fee": "166.19"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0040-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00041",
+      "llm_claim": {
+        "refund_amount": "129.20"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0040-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00041']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00041",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0041-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.574.20 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.332.61 by Rs.241.59 (> tolerance Rs.18.79). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00042",
+      "llm_claim": {
+        "actual_fee": "574.20"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0041-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00042",
+      "llm_claim": {
+        "refund_amount": "241.59"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0041-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00042']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00042",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0042-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.3858.00 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.604.65 by Rs.3253.35 (> tolerance Rs.34.16). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00043",
+      "llm_claim": {
+        "actual_fee": "3858.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0042-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00043",
+      "llm_claim": {
+        "refund_amount": "3253.35"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0042-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00043']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00043",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0043-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.7541.82 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.896.48 by Rs.6645.34 (> tolerance Rs.35.86). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00044",
+      "llm_claim": {
+        "actual_fee": "7541.82"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0043-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00044",
+      "llm_claim": {
+        "refund_amount": "6645.34"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0043-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00044']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00044",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0044-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.170.43 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.122.30 by Rs.48.13 (> tolerance Rs.6.91). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00045",
+      "llm_claim": {
+        "actual_fee": "170.43"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0044-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00045",
+      "llm_claim": {
+        "refund_amount": "48.13"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0044-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00045']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00045",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0045-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.1376.43 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.327.04 by Rs.1049.39 (> tolerance Rs.16.35). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00046",
+      "llm_claim": {
+        "actual_fee": "1376.43"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0045-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00046",
+      "llm_claim": {
+        "refund_amount": "1049.39"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0045-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00046']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00046",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0046-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.2203.57 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.67.38 by Rs.2136.19 (> tolerance Rs.13.48). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00047",
+      "llm_claim": {
+        "actual_fee": "2203.57"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0046-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00047",
+      "llm_claim": {
+        "refund_amount": "2136.19"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0046-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00047']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00047",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0047-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.7897.98 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.724.47 by Rs.7173.51 (> tolerance Rs.36.22). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00048",
+      "llm_claim": {
+        "actual_fee": "7897.98"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0047-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00048",
+      "llm_claim": {
+        "refund_amount": "7173.51"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0047-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00048']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00048",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0048-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.6102.38 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.1094.37 by Rs.5008.01 (> tolerance Rs.46.37). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00049",
+      "llm_claim": {
+        "actual_fee": "6102.38"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0048-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00049",
+      "llm_claim": {
+        "refund_amount": "5008.01"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0048-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00049']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00049",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0049-smart_fee_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "smart_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected: the LLM's proposed actual_fee Rs.1213.42 would arithmetically close the gap if used in place of fee_charged, but it disagrees with the payout row's actual fee_charged Rs.94.33 by Rs.1119.09 (> tolerance Rs.6.29). The guard validates against the settlement's recorded fee, not the model's proposal.",
+      "pass": true,
+      "context_key": "HELD-ORD-00050",
+      "llm_claim": {
+        "actual_fee": "1213.42"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0049-wrong_status_refund_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "wrong_status_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: ledger_status_supports_refund (order.status = 'captured' (expected 'partially_refunded' or 'refunded'))",
+      "pass": true,
+      "context_key": "HELD-ORD-00050",
+      "llm_claim": {
+        "refund_amount": "1119.09"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0049-ghost_split_lie",
+      "scenario": "unresolvable_captured",
+      "lie_kind": "ghost_split_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "SPLIT_PAYOUT rejected. Failures: all_legs_exist_and_in_window (claimed leg IDs ['FAKE-Z-A', 'FAKE-Z-B'] vs in-window payouts ['HELD-PYT-00050']; missing/unknown: ['FAKE-Z-A', 'FAKE-Z-B'])",
+      "pass": true,
+      "context_key": "HELD-ORD-00050",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "FAKE-Z-A",
+          "FAKE-Z-B"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0050-orphan_fee_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: order_exists (no ledger order present (orphan payout))",
+      "pass": true,
+      "context_key": "HELD-ORD-Z45785",
+      "llm_claim": {
+        "actual_fee": "74.16"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0050-orphan_refund_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: order_exists (no ledger order present)",
+      "pass": true,
+      "context_key": "HELD-ORD-Z45785",
+      "llm_claim": {
+        "refund_amount": "0.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0051-orphan_fee_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: order_exists (no ledger order present (orphan payout))",
+      "pass": true,
+      "context_key": "HELD-ORD-Z10020",
+      "llm_claim": {
+        "actual_fee": "76.81"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0051-orphan_refund_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: order_exists (no ledger order present)",
+      "pass": true,
+      "context_key": "HELD-ORD-Z10020",
+      "llm_claim": {
+        "refund_amount": "0.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0052-orphan_fee_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: order_exists (no ledger order present (orphan payout))",
+      "pass": true,
+      "context_key": "HELD-ORD-Z17759",
+      "llm_claim": {
+        "actual_fee": "14.65"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0052-orphan_refund_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: order_exists (no ledger order present)",
+      "pass": true,
+      "context_key": "HELD-ORD-Z17759",
+      "llm_claim": {
+        "refund_amount": "0.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0053-orphan_fee_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: order_exists (no ledger order present (orphan payout))",
+      "pass": true,
+      "context_key": "HELD-ORD-Z95463",
+      "llm_claim": {
+        "actual_fee": "54.70"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0053-orphan_refund_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: order_exists (no ledger order present)",
+      "pass": true,
+      "context_key": "HELD-ORD-Z95463",
+      "llm_claim": {
+        "refund_amount": "0.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0054-orphan_fee_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: order_exists (no ledger order present (orphan payout))",
+      "pass": true,
+      "context_key": "HELD-ORD-Z30436",
+      "llm_claim": {
+        "actual_fee": "55.73"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0054-orphan_refund_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: order_exists (no ledger order present)",
+      "pass": true,
+      "context_key": "HELD-ORD-Z30436",
+      "llm_claim": {
+        "refund_amount": "0.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0055-orphan_fee_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: order_exists (no ledger order present (orphan payout))",
+      "pass": true,
+      "context_key": "HELD-ORD-Z49241",
+      "llm_claim": {
+        "actual_fee": "66.23"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0055-orphan_refund_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: order_exists (no ledger order present)",
+      "pass": true,
+      "context_key": "HELD-ORD-Z49241",
+      "llm_claim": {
+        "refund_amount": "0.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0056-orphan_fee_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: order_exists (no ledger order present (orphan payout))",
+      "pass": true,
+      "context_key": "HELD-ORD-Z97060",
+      "llm_claim": {
+        "actual_fee": "26.86"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0056-orphan_refund_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: order_exists (no ledger order present)",
+      "pass": true,
+      "context_key": "HELD-ORD-Z97060",
+      "llm_claim": {
+        "refund_amount": "0.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0057-orphan_fee_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: order_exists (no ledger order present (orphan payout))",
+      "pass": true,
+      "context_key": "HELD-ORD-Z21691",
+      "llm_claim": {
+        "actual_fee": "61.23"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0057-orphan_refund_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: order_exists (no ledger order present)",
+      "pass": true,
+      "context_key": "HELD-ORD-Z21691",
+      "llm_claim": {
+        "refund_amount": "0.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0058-orphan_fee_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: order_exists (no ledger order present (orphan payout))",
+      "pass": true,
+      "context_key": "HELD-ORD-Z67153",
+      "llm_claim": {
+        "actual_fee": "79.47"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0058-orphan_refund_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: order_exists (no ledger order present)",
+      "pass": true,
+      "context_key": "HELD-ORD-Z67153",
+      "llm_claim": {
+        "refund_amount": "0.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0059-orphan_fee_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_fee_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "FEE_VARIANCE rejected. Failures: order_exists (no ledger order present (orphan payout))",
+      "pass": true,
+      "context_key": "HELD-ORD-Z72016",
+      "llm_claim": {
+        "actual_fee": "15.16"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0059-orphan_refund_lie",
+      "scenario": "orphan",
+      "lie_kind": "orphan_refund_lie",
+      "kind": "adversarial",
+      "expected_guard": "REJECT",
+      "guard_verdict": "REJECTED",
+      "guard_reason": "PARTIAL_REFUND rejected. Failures: order_exists (no ledger order present)",
+      "pass": true,
+      "context_key": "HELD-ORD-Z72016",
+      "llm_claim": {
+        "refund_amount": "0.00"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0060-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00051",
+      "llm_claim": {
+        "actual_fee": "232.72"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0061-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00052",
+      "llm_claim": {
+        "actual_fee": "37.46"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0062-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00053",
+      "llm_claim": {
+        "actual_fee": "93.64"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0063-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00054",
+      "llm_claim": {
+        "actual_fee": "995.10"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0064-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00055",
+      "llm_claim": {
+        "actual_fee": "219.83"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0065-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00056",
+      "llm_claim": {
+        "actual_fee": "676.53"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0066-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00057",
+      "llm_claim": {
+        "actual_fee": "771.71"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0067-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00058",
+      "llm_claim": {
+        "actual_fee": "245.65"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0068-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00059",
+      "llm_claim": {
+        "actual_fee": "43.91"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0069-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00060",
+      "llm_claim": {
+        "actual_fee": "598.92"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0070-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00061",
+      "llm_claim": {
+        "actual_fee": "503.55"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0071-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00062",
+      "llm_claim": {
+        "actual_fee": "646.21"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0072-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00063",
+      "llm_claim": {
+        "actual_fee": "135.29"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0073-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00064",
+      "llm_claim": {
+        "actual_fee": "644.63"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0074-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00065",
+      "llm_claim": {
+        "actual_fee": "541.01"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0075-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00066",
+      "llm_claim": {
+        "actual_fee": "183.58"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0076-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00067",
+      "llm_claim": {
+        "actual_fee": "608.65"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0077-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00068",
+      "llm_claim": {
+        "actual_fee": "1018.15"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0078-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00069",
+      "llm_claim": {
+        "actual_fee": "91.04"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0079-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00070",
+      "llm_claim": {
+        "actual_fee": "682.22"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0080-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00071",
+      "llm_claim": {
+        "actual_fee": "382.89"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0081-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00072",
+      "llm_claim": {
+        "actual_fee": "217.36"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0082-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00073",
+      "llm_claim": {
+        "actual_fee": "66.69"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0083-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00074",
+      "llm_claim": {
+        "actual_fee": "500.07"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0084-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00075",
+      "llm_claim": {
+        "actual_fee": "297.59"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0085-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00076",
+      "llm_claim": {
+        "actual_fee": "177.61"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0086-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00077",
+      "llm_claim": {
+        "actual_fee": "136.32"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0087-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00078",
+      "llm_claim": {
+        "actual_fee": "789.18"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0088-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00079",
+      "llm_claim": {
+        "actual_fee": "213.12"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0089-legit_fee_variance",
+      "scenario": "valid_fee_variance",
+      "lie_kind": "legit_fee_variance",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "FEE_VARIANCE verified: 5 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00080",
+      "llm_claim": {
+        "actual_fee": "682.43"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0090-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00081",
+      "llm_claim": {
+        "refund_amount": "10731.44"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0091-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00082",
+      "llm_claim": {
+        "refund_amount": "13765.28"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0092-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00083",
+      "llm_claim": {
+        "refund_amount": "5512.41"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0093-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00084",
+      "llm_claim": {
+        "refund_amount": "21165.33"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0094-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00085",
+      "llm_claim": {
+        "refund_amount": "3201.05"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0095-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00086",
+      "llm_claim": {
+        "refund_amount": "24764.11"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0096-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00087",
+      "llm_claim": {
+        "refund_amount": "7169.71"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0097-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00088",
+      "llm_claim": {
+        "refund_amount": "19246.39"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0098-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00089",
+      "llm_claim": {
+        "refund_amount": "12902.59"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0099-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00090",
+      "llm_claim": {
+        "refund_amount": "4488.38"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0100-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00091",
+      "llm_claim": {
+        "refund_amount": "24063.95"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0101-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00092",
+      "llm_claim": {
+        "refund_amount": "1784.51"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0102-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00093",
+      "llm_claim": {
+        "refund_amount": "17568.08"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0103-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00094",
+      "llm_claim": {
+        "refund_amount": "5324.47"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0104-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00095",
+      "llm_claim": {
+        "refund_amount": "3689.78"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0105-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00096",
+      "llm_claim": {
+        "refund_amount": "13121.70"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0106-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00097",
+      "llm_claim": {
+        "refund_amount": "306.22"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0107-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00098",
+      "llm_claim": {
+        "refund_amount": "1992.48"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0108-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00099",
+      "llm_claim": {
+        "refund_amount": "2172.23"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0109-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00100",
+      "llm_claim": {
+        "refund_amount": "13570.81"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0110-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00101",
+      "llm_claim": {
+        "refund_amount": "7635.45"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0111-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00102",
+      "llm_claim": {
+        "refund_amount": "6727.29"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0112-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00103",
+      "llm_claim": {
+        "refund_amount": "13471.80"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0113-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00104",
+      "llm_claim": {
+        "refund_amount": "1973.57"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0114-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00105",
+      "llm_claim": {
+        "refund_amount": "17569.63"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0115-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00106",
+      "llm_claim": {
+        "refund_amount": "14955.49"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0116-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00107",
+      "llm_claim": {
+        "refund_amount": "3172.66"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0117-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00108",
+      "llm_claim": {
+        "refund_amount": "11181.81"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0118-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00109",
+      "llm_claim": {
+        "refund_amount": "4054.81"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0119-legit_partial_refund",
+      "scenario": "valid_partial_refund",
+      "lie_kind": "legit_partial_refund",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "PARTIAL_REFUND verified: 6 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00110",
+      "llm_claim": {
+        "refund_amount": "812.72"
+      }
+    },
+    {
+      "case_id": "HELDOUT-0120-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00111",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00121",
+          "HELD-PYT-00122"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0121-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00112",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00123",
+          "HELD-PYT-00124"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0122-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00113",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00125",
+          "HELD-PYT-00126"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0123-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00114",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00127",
+          "HELD-PYT-00128"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0124-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00115",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00129",
+          "HELD-PYT-00130"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0125-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00116",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00131",
+          "HELD-PYT-00132"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0126-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00117",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00133",
+          "HELD-PYT-00134"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0127-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00118",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00135",
+          "HELD-PYT-00136"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0128-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00119",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00137",
+          "HELD-PYT-00138"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0129-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00120",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00139",
+          "HELD-PYT-00140"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0130-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00121",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00141",
+          "HELD-PYT-00142"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0131-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00122",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00143",
+          "HELD-PYT-00144"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0132-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00123",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00145",
+          "HELD-PYT-00146"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0133-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00124",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00147",
+          "HELD-PYT-00148"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0134-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00125",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00149",
+          "HELD-PYT-00150"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0135-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00126",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00151",
+          "HELD-PYT-00152"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0136-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00127",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00153",
+          "HELD-PYT-00154"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0137-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00128",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00155",
+          "HELD-PYT-00156"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0138-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00129",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00157",
+          "HELD-PYT-00158"
+        ]
+      }
+    },
+    {
+      "case_id": "HELDOUT-0139-legit_split",
+      "scenario": "valid_split",
+      "lie_kind": "legit_split",
+      "kind": "legit",
+      "expected_guard": "ACCEPT",
+      "guard_verdict": "ACCEPTED",
+      "guard_reason": "SPLIT_PAYOUT verified: 4 invariant(s) passed.",
+      "pass": true,
+      "context_key": "HELD-ORD-00130",
+      "llm_claim": {
+        "leg_payout_ids": [
+          "HELD-PYT-00159",
+          "HELD-PYT-00160"
+        ]
+      }
+    }
+  ]
+}
