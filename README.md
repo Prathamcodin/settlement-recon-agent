@@ -1,12 +1,13 @@
 # Settlement Reconciliation Agent
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests 53 passing](https://img.shields.io/badge/tests-53_passing-brightgreen.svg)](tests/)
+[![Tests 81 passing](https://img.shields.io/badge/tests-81_passing-brightgreen.svg)](tests/)
 [![Razorpay Buildathon — Track 04](https://img.shields.io/badge/Razorpay_Buildathon-Track_04-orange.svg)](#)
 
 Matches merchant orders against aggregator settlements, auto-reconciles the clean
 majority with deterministic logic, and boxes the LLM in with a validation guard
-so it cannot hallucinate money into balancing.
+so it cannot hallucinate money into balancing. Every run can be saved to a
+MongoDB audit store and queried afterwards through the API.
 
 ## Results on the reference batch (63 records)
 
@@ -15,6 +16,14 @@ so it cannot hallucinate money into balancing.
 | Deterministic matcher | **51 / 63** auto-matched (81%) | Pure logic ceiling — no LLM involved |
 | LLM classifier (Gemini 3.6 Flash, live) | **0** false reconciliations across 12 escalations | *This batch went clean — but that's not a safety guarantee at scale.* One wrong auto-reconcile moves real money. |
 | Validation guard | **6 / 6** adversarial fabrications rejected — including one arithmetically-perfect **"smart lie"** | The mandatory invariant that makes the system trustworthy regardless of what the LLM does on the next batch. |
+
+At scale (no LLM calls involved):
+- **Matcher:** 100,800 synthetic records matched in **1.9 s** with **0 false
+  auto-matches**, and the whole run saved to MongoDB in **3.9 s**
+  ([Scale benchmark](#scale-benchmark)).
+- **Guard:** **34,000 / 34,000** mechanically generated lies rejected and
+  **16,000 / 16,000** legitimate claims accepted, 50,000 cases across 5 seeds
+  ([Guard at 50,000 cases](#guard-at-50000-cases)).
 
 ## Run it — no API key, no network
 
@@ -79,8 +88,8 @@ Guard test:  6/6 adversarial fabrications rejected on hand-crafted fixtures,
 **A capable model got 11 / 12 on this batch. That is exactly why the guard must
 exist** — because one wrong auto-reconcile moves real money. The guard is not a
 fallback for when the LLM misbehaves; it is a mandatory invariant that runs on
-every classification, verified against ten hand-crafted adversarial cases
-including the hardest one below.
+every classification, verified against ten hand-crafted fixtures (six
+adversarial lies and four legitimate cases), including the hardest one below.
 
 ### The "smart lie"
 
@@ -154,7 +163,7 @@ changes anywhere else.
 
 | Path | Layer / role |
 |---|---|
-| [src/generator/](src/generator/) | Seeded synthetic-data generator (63 records, controlled scenario mix) |
+| [src/generator/](src/generator/) | Seeded synthetic-data generator (63 records, controlled scenario mix; `--scale N` multiplies it) |
 | [src/matcher/](src/matcher/) | Layer 1 — deterministic matcher + precedence rules |
 | [src/classifier/](src/classifier/) | Layer 2 — LLM classifier, `LLMBackend` Protocol, `GeminiBackend`, record/replay mechanics |
 | [src/classifier/prompt.py](src/classifier/prompt.py) | The fair strict-JSON classification prompt |
@@ -163,10 +172,11 @@ changes anywhere else.
 | [src/api/](src/api/) | FastAPI `/reconcile` surface (replay-only) |
 | [src/tolerance.py](src/tolerance.py) | `max(Rs.0.50, 0.1% × gross)` — shared by matcher, guard, generator |
 | [src/models.py](src/models.py) | Shared dataclasses: `Order`, `Payout`, `MatchDecision` |
-| [tests/](tests/) | 49 tests: matcher, classifier, guard, reporter, API |
+| [src/store/](src/store/) | MongoDB audit store: every run and its per-record audit trail, queryable |
+| [tests/](tests/) | 81 tests (+5 that run against a real MongoDB): matcher, classifier, guard, reporter, API, store, generator |
 | [tests/fixtures/](tests/fixtures/) | Hand-crafted LLM-shaped adversarial + positive fixtures |
 | [evidence/](evidence/) | Live-recorded LLM output + before/after-guard artifacts |
-| [scripts/](scripts/) | Evaluation scripts (`capture_before_guard.py`, `capture_after_guard.py`) |
+| [scripts/](scripts/) | Evaluation scripts (`capture_before_guard.py`, `capture_after_guard.py`, `scale_benchmark.py`, `stress_guard.py`) |
 | [run.py](run.py) | Top-level pipeline entrypoint |
 
 ## Evidence artifacts
@@ -188,6 +198,9 @@ changes anywhere else.
   adversarial stress test (see next section): 170/170 mechanically-generated
   smart lies rejected and 80/80 legitimate positive controls accepted across
   140 randomized records at seed=1337.
+- **[evidence/guard_stress.json](evidence/guard_stress.json)** — the same suite
+  at 50,000 cases across 5 seeds: 34,000/34,000 lies rejected, 16,000/16,000
+  legitimate accepted (see [Guard at 50,000 cases](#guard-at-50000-cases)).
 
 ## Held-out adversarial stress test
 
@@ -225,6 +238,31 @@ closed: an unknown category is always rejected, on principle (see the
 Regenerate any time with `python scripts/capture_heldout_guard.py` (no key,
 no network, ~0.05s).
 
+### Guard at 50,000 cases
+
+`scripts/stress_guard.py` runs the same held-out suite 40x larger on five
+different seeds, through the unchanged guard, and records any case it gets
+wrong ([evidence/guard_stress.json](evidence/guard_stress.json)):
+
+| Case type | Cases | Guard result |
+|---|---|---|
+| Smart fee lie (arithmetic closes, contradicts `fee_charged`) | 10,000 | all rejected |
+| Refund lie on an order the ledger says is `captured` | 10,000 | all rejected |
+| Ghost split (invented payout legs) | 10,000 | all rejected |
+| Fee / refund claims on an orphan payout | 4,000 | all rejected |
+| Legitimate fee variance, partial refund, split | 16,000 | all accepted |
+| **Total** | **50,000** | **0 mistakes** (1.9 s) |
+
+Same scope as above: more randomized amounts, fee rates and seeds for the
+modeled lie types, not new kinds of lies. What the larger run adds is
+evidence that the checks don't depend on the particular 140 records at
+seed 1337; the original 250-case suite is unchanged.
+
+```bash
+python scripts/stress_guard.py                       # 50,000 cases
+python scripts/stress_guard.py --scale 4 --seeds 7   # quick run
+```
+
 ## Recording new evidence (advanced)
 
 The default `python run.py` replays committed recordings. To recapture — after
@@ -247,7 +285,7 @@ prompt that produced them.
 ## FastAPI `/reconcile`
 
 ```bash
-docker compose --profile api up
+docker compose --profile api up      # starts MongoDB + the API
 # then:
 curl http://localhost:8000/reconcile/sample | jq
 ```
@@ -258,6 +296,9 @@ Endpoints:
 - `GET /reconcile/sample` — runs the pipeline on the committed batch (no upload)
 - `POST /reconcile` — accepts multipart uploads of `orders` + `settlements`
   CSVs; runs the full pipeline; returns the JSON report
+- `GET /runs`, `GET /runs/{run_id}`, `GET /runs/{run_id}/decisions`,
+  `GET /runs/{run_id}/decisions/{key}` — query saved runs
+  (see [Audit store](#audit-store-mongodb))
 
 **Design note.** The matcher and the guard execute **live** on any uploaded
 CSVs — pure logic, no cache. The LLM classifier is **replay-only** — reads from
@@ -268,22 +309,171 @@ demo day, cannot generate new bills, and cannot silently accept whatever the
 model says next. Recording new evidence remains a CLI operation
 (`run.py --record-live`) where a human is present to approve API calls.
 
+## Audit store (MongoDB)
+
+A report printed once can't answer the questions a reconciliation team asks
+afterwards: *"which records in Tuesday's batch were forced to
+GENUINE_MISMATCH?"*, *"show me the full audit trail for ORD-0006"*. When
+`MONGO_URL` is set, every run (API or `python run.py --save`) is saved to
+MongoDB and the `/runs` endpoints query it. Without `MONGO_URL` everything
+works as before and `/runs` answers 503.
+
+```bash
+docker compose --profile api up -d mongo
+MONGO_URL=mongodb://localhost:27017 python run.py --save
+MONGO_URL=mongodb://localhost:27017 uvicorn src.api.app:app
+```
+
+```
+POST /reconcile                                      -> {..., "run_id": "633be0..."}
+GET  /runs                                           -> past runs, newest first
+GET  /runs/{run_id}                                  -> counts + category breakdown
+GET  /runs/{run_id}/decisions?category=FEE_VARIANCE  -> the 5 fee-variance records
+GET  /runs/{run_id}/decisions?exceptions_only=true   -> everything not MATCHED
+GET  /runs/{run_id}/decisions/ORD-0006               -> full audit trail for one record
+```
+
+**Why a document store.** One decision's audit trail is a nested document
+whose shape depends on its category: a clean match has no LLM fields at all;
+an escalation carries the LLM's claim (`actual_fee` for a fee variance,
+`refund_amount` for a refund, leg ids for a split) and a variable-length list
+of guard checks. In MongoDB it is stored and read back exactly as the
+reporter builds it. In SQL it would need separate tables for decisions,
+claims and guard checks, joined on every read, plus a JSON column for the
+free-form claim anyway.
+
+**Two collections** ([src/store/mongo_store.py](src/store/mongo_store.py)):
+
+| Collection | One document per | Indexes |
+|---|---|---|
+| `runs` | batch run: source, time, counts, input fingerprint | `created_at` (newest-first listing), `input_fingerprint` |
+| `decisions` | record in a run, with its full audit trail | `(run_id, key)` **unique**, `(run_id, final_category)` |
+
+Every query is scoped to one run, so `run_id` leads both indexes. The unique
+index makes "one decision per record per run" a database rule, not just a
+convention. On the 100,800-record run, the exception query is served by the
+`run_category` index in **6.7 ms** (checked with `explain()`).
+
+**Money is never a float, here either.** Enforced at both ends:
+
+- **At the source.** The classifier parses the LLM's JSON with
+  `parse_float=str`. The prompt asks for money as decimal strings
+  (`"actual_fee": "63.42"`); a model that returns a JSON number
+  (`63.42`) still yields the exact text `"63.42"`, never a float.
+- **At the store.** `Decimal` is written as BSON `Decimal128` (exact) and
+  read back as a decimal string; decimal strings are stored verbatim. A
+  **float is rejected, not converted**: by the time a float exists its
+  precision may already be gone (`0.1 + 0.2` is `0.30000000000000004`), and
+  converting it would only record that error exactly. `save_run` raises
+  `TypeError` naming where the float was (e.g. `ORD-B.llm_claim.actual_fee`),
+  and it checks every document **before the first write**, so a rejected
+  report leaves nothing behind, not even a `"writing"` run.
+
+Tested on mongomock and on a real MongoDB.
+
+**Partial writes.** A run is inserted with `status: "writing"`, its decisions
+go in with one bulk insert, then the run flips to `"complete"`. Readers only
+see complete runs, so a crash halfway through a save never shows up as a run
+with missing decisions. A multi-document transaction would also work, but
+needs MongoDB running as a replica set.
+
+**Abandoned runs.** A run still `"writing"` an hour after it started belongs
+to a process that died (saving 100,800 decisions takes about 4 seconds).
+`purge_abandoned_runs()` deletes those runs and their partial decisions, and
+runs every time the store connects. It deletes the **decisions first and the
+run last**: if it dies in between, what's left is a stale `"writing"` run with
+no decisions, which the next purge removes. The other order could leave
+decisions whose run is gone, which nothing would ever find again (a test
+interrupts the purge halfway to check this). A TTL index wouldn't do: TTL
+deletes documents one collection at a time, so it would remove the run and
+leave its decisions orphaned.
+
+**Re-running the same input.** Reconciling the same files twice creates two
+runs, on purpose: an audit log records every attempt, and a re-run after a
+guard or prompt change can legitimately reach different verdicts. Each run
+stores `input_fingerprint`, a SHA-256 of the batch content that ignores row
+order, so repeats are visible: the response says
+`"previous_runs_with_same_input": 1`, and
+`GET /runs?input_fingerprint=...` lists every run of that input.
+
+**Tests.** The store and endpoints are tested against `mongomock` (in-memory,
+no server) in the normal suite, and against a real MongoDB in
+[tests/test_store_integration.py](tests/test_store_integration.py), which runs
+when `MONGO_URL` is set.
+
+## Scale benchmark
+
+The reference batch is 63 records. `scripts/scale_benchmark.py` generates the
+same scenario mix multiplied (`--scale 1600` gives 100,800 reconciliation
+units), runs the deterministic matcher, and scores every decision against
+the generator's ground truth.
+
+```bash
+python scripts/scale_benchmark.py                                      # matcher only
+MONGO_URL=mongodb://localhost:27017 python scripts/scale_benchmark.py  # + MongoDB timings
+```
+
+Result on one laptop (MongoDB 7 in Docker on the same machine),
+[evidence/scale_benchmark.json](evidence/scale_benchmark.json):
+
+| Measure | 100,800 records |
+|---|---|
+| Matcher | **1.9 s** (~53,000 records/s) |
+| Auto-matched | 81,600 (81.0%), the same rate as the 63-record batch |
+| False auto-matches (closed a record that needed review) | **0** |
+| Missed matches (escalated a record it could have closed) | 0 |
+| MongoDB: save the run (100,800 documents) | **3.9 s** (~25,700 docs/s) |
+| MongoDB: first 100 GENUINE_MISMATCH records | 6.7 ms, via the `run_category` index |
+| MongoDB: category breakdown (aggregation) | 121 ms |
+
+**Scope.** This covers the deterministic layers. The LLM classifier is not
+called at this scale: escalations have no recorded responses, and thousands
+of live calls would cost money and could not be replayed. So escalations take
+the pipeline's fail-closed path (no classification means GENUINE_MISMATCH, a
+human reviews it). The guard is stress-tested separately on 170 generated
+lies (see [Held-out adversarial stress test](#held-out-adversarial-stress-test)).
+
+### A matcher bug the scale run found
+
+The first 100,800-record run showed **72 false auto-matches**, none of which
+appear in the 63-record batch. All 72 were fee variances on small orders
+(around ₹100–140): the merchant expected a flat 2% fee, the aggregator
+charged 2% + GST, and on a ₹138 order that difference is ₹0.50, inside the
+₹0.50 rounding floor. The matcher absorbed it as rounding.
+
+But rounding never changes the fee. A single payout now auto-matches only if
+`fee_charged` equals the order's `expected_fee`; otherwise it escalates as
+`fee_mismatch`, however small the gap, and the classifier and guard handle
+it as a fee variance. After the fix: **0 false auto-matches** at 10,080 and
+100,800 records, and the 63-record batch still matches exactly 51
+(regression tests in [tests/test_matcher.py](tests/test_matcher.py)).
+
+The scaled generator also needed one fix: orphan payouts used random
+`ORD-9xxx` refs, which collide with real order ids past ~9,100 orders and
+with each other. Scaled batches give orphans their own sequence; scale 1 is
+byte-identical to before, so the committed LLM recordings still line up.
+
 ## Tests
 
 ```bash
 python -m pytest tests/
 ```
 
-**53 tests, all green.** Coverage by layer:
+**81 tests, all green**, plus 5 that run against a real MongoDB when
+`MONGO_URL` is set. On a fresh clone the reference batch is generated
+automatically ([tests/conftest.py](tests/conftest.py)). Coverage by layer:
 
 | Suite | Tests | What they prove |
 |---|---|---|
-| `test_matcher.py` | 13 | Exact/tolerance/split-sum match paths, late-leg precedence, orphan payouts, out-of-window escalation, ground-truth-isolation invariant |
+| `test_matcher.py` | 15 | Exact/tolerance/split-sum match paths, late-leg precedence, orphan payouts, out-of-window escalation, ground-truth-isolation invariant, fee change inside tolerance escalates as `fee_mismatch` |
 | `test_classifier.py` | 13 | Record/replay mechanics, backend Protocol satisfaction via fake, safe-filename handling, missing-response error |
 | `test_guard.py` | 15 | Parametrized over every fixture (adversarial rejected, positive accepted), smart-lie reason string, reconciles=false counterfactual logging, unknown-category rejection |
 | `test_reporter.py` | 4 | Report shape, guard-reject rendering, **two-labeled-facts invariant** (Live batch and Guard test as separate lines), graceful missing-evidence handling |
-| `test_api.py` | 4 | Root advertises replay-only, `GET /reconcile/sample` returns stable numbers, `POST /reconcile` round-trips uploads, replay-miss returns 422 |
-| `test_heldout_guard.py` | 4 | Held-out suite generates >=100 adversarial + >=30 legit cases, guard rejects all 170 mechanically-generated smart lies at seed=1337, guard accepts all 80 legitimate positive controls, seed reproducibility |
+| `test_api.py` | 9 | Root advertises replay-only, `GET /reconcile/sample` returns stable numbers, `POST /reconcile` round-trips uploads, replay-miss returns 422, runs saved and queried through `/runs`, re-runs of one input linked by fingerprint, 404s, 503 without a store |
+| `test_store.py` | 17 | Save and query runs, aggregation agrees with the report, category and exception filters, full audit trail, run isolation, half-written runs hidden, abandoned runs purged (in-progress ones kept, no orphans if the purge dies halfway), Decimal and decimal strings stored exactly, **saving a float raises and writes nothing**, LLM JSON numbers parsed as exact text, input fingerprint, indexes |
+| `test_generator_scale.py` | 3 | `--scale` multiplies every scenario, scaled keys are unique, scale 1 is byte-identical to the reference batch |
+| `test_store_integration.py` | 5 | Real MongoDB: round trip and aggregation, exception query uses the `run_category` index, unique key per run enforced, exact Decimal128 money and float rejection, abandoned-run purge (skipped without `MONGO_URL`) |
+| `test_heldout_guard.py` | 5 | Held-out suite generates >=100 adversarial + >=30 legit cases, guard rejects all 170 mechanically-generated smart lies at seed=1337, guard accepts all 80 legitimate positive controls, seed reproducibility, 3,000 more cases across 3 other seeds |
 
 ## What we deliberately did NOT do
 
@@ -335,4 +525,6 @@ ded70d2  Step 3b: live LLM capture (Gemini 3.6 Flash) + honest framing
 db1f261  Step 6: Dockerize + full README
 ```
 
-Each step passes its own tests and is checkoutable independently.
+Each step passes its own tests and is checkoutable independently. Later
+commits add the held-out adversarial suite, rich terminal output, and the
+MongoDB audit store with the scale benchmark.
