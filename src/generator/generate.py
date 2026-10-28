@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import itertools
 import json
 import random
 from dataclasses import dataclass
@@ -336,9 +337,8 @@ def build_timing_window(rng, next_order, next_payout, times):
 
 def build_genuine_mismatch_orphan(rng, next_order, next_payout, times):
     # A payout row referencing an order that does not exist in the ledger.
-    # No order is added. Fake ref uses the ORD-9xxx band so it won't
-    # collide with the ORD-0001..ORD-0063 sequence.
-    fake_ref = f"ORD-9{rng.randint(100, 999)}"
+    # No order is added. See _orphan_ref for how the fake ref is chosen.
+    fake_ref = _orphan_ref(rng)
     gross = money(Decimal(rng.randint(10000, 200000)) / 100)
     fee = _fee_with_gst(gross, FEE_RATES["card"])
     p = Payout(
@@ -379,6 +379,16 @@ _NEAR_MISSES = [
     },
 ]
 _near_miss_iter = iter(_NEAR_MISSES)
+
+
+def _reference_orphan_ref(rng) -> str:
+    # Reference batch (scale 1): the ORD-9xxx band can't collide with the
+    # ORD-0001..ORD-0063 sequence, and these exact refs are what the
+    # committed LLM recordings were captured on.
+    return f"ORD-9{rng.randint(100, 999)}"
+
+
+_orphan_ref: Callable = _reference_orphan_ref
 
 
 def build_genuine_mismatch_near_miss(rng, next_order, next_payout, times):
@@ -422,11 +432,31 @@ SCENARIO_BUILDERS: dict[str, Callable] = {
 # Top-level orchestration
 # --------------------------------------------------------------------------
 
-def generate(seed: int, out_dir: Path) -> dict:
+def generate(seed: int, out_dir: Path, scale: int = 1) -> dict:
+    """
+    Write one batch to out_dir. `scale` multiplies every scenario count
+    (scale=1 is the 63-record reference batch; scale=1000 is 63,000
+    reconciliation units). scale=1 output is byte-identical to the
+    original generator, so the committed LLM recordings still line up.
+    """
+    if scale < 1:
+        raise ValueError("scale must be >= 1")
     rng = random.Random(seed)
-    # Reset near-miss iterator so repeat runs behave the same.
-    global _near_miss_iter
-    _near_miss_iter = iter(_NEAR_MISSES)
+    # Reset per-run state so repeat runs behave the same.
+    global _near_miss_iter, _orphan_ref
+    if scale == 1:
+        _near_miss_iter = iter(_NEAR_MISSES)
+        _orphan_ref = _reference_orphan_ref
+    else:
+        # Scaled batches reuse the two hand-built near-misses in rotation,
+        # and give orphans their own sequence: past ~9,100 orders the
+        # ORD-9xxx band would collide with real order ids, and random
+        # 3-digit refs would collide with each other.
+        _near_miss_iter = itertools.cycle(_NEAR_MISSES)
+        _next_orphan = _make_id_factory("ORPHAN")
+        _orphan_ref = lambda rng: _next_orphan()   # noqa: E731
+
+    scenario_mix = {name: count * scale for name, count in SCENARIO_MIX.items()}
 
     out_dir.mkdir(parents=True, exist_ok=True)
     orders: list[Order] = []
@@ -441,7 +471,7 @@ def generate(seed: int, out_dir: Path) -> dict:
     # scenarios interleave naturally in the file (as a real settlement
     # file would — no block of 45 clean rows followed by a block of exceptions).
     sequence: list[str] = []
-    for scenario, count in SCENARIO_MIX.items():
+    for scenario, count in scenario_mix.items():
         sequence.extend([scenario] * count)
     rng.shuffle(sequence)
 
@@ -464,7 +494,7 @@ def generate(seed: int, out_dir: Path) -> dict:
         "orders": len(orders),
         "payouts": len(payouts),
         "ground_truth_entries": len(truths),
-        "scenario_mix": SCENARIO_MIX,
+        "scenario_mix": scenario_mix,
         "recon_date": iso(RECON_DATE),
     }
 
@@ -519,9 +549,11 @@ def main() -> None:
                         help="RNG seed (default: 42; keep for reproducibility)")
     parser.add_argument("--out", type=Path, default=Path("data"),
                         help="Output directory (default: ./data)")
+    parser.add_argument("--scale", type=int, default=1,
+                        help="Multiply every scenario count (default: 1 = the 63-record batch)")
     args = parser.parse_args()
 
-    summary = generate(seed=args.seed, out_dir=args.out)
+    summary = generate(seed=args.seed, out_dir=args.out, scale=args.scale)
     print("Generated synthetic reconciliation batch")
     print(f"  recon_date : {summary['recon_date']}")
     print(f"  orders     : {summary['orders']} -> {args.out}/orders_ledger.csv")

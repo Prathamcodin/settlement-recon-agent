@@ -1,0 +1,46 @@
+{
+  "scale": 1600,
+  "seed": 7,
+  "machine": "Windows AMD64, Python 3.11.9",
+  "units": 100800,
+  "orders": 99200,
+  "payouts": 107200,
+  "matcher": {
+    "matched": 81600,
+    "escalated": 19200,
+    "match_rate": 0.8095,
+    "false_auto_matches": 0,
+    "missed_matches": 0,
+    "seconds": 1.897,
+    "units_per_second": 53129
+  },
+  "timings_seconds": {
+    "generate": 4.724,
+    "load_csv": 2.056
+  },
+  "scenario_mix": {
+    "clean": 72000,
+    "fee_variance": 8000,
+    "timing_window": 1600,
+    "rounding": 4800,
+    "split_payout_clean": 4800,
+    "genuine_mismatch_orphan": 1600,
+    "partial_refund": 3200,
+    "genuine_mismatch_near_miss": 3200,
+    "split_payout_messy": 1600
+  },
+  "mongodb": {
+    "run_id": "19717581365a4605b7b2f3f4637d254e",
+    "documents_written": 100800,
+    "save_seconds": 3.918,
+    "documents_per_second": 25726,
+    "exception_query_ms_first_100": 6.67,
+    "exceptions_returned": 100,
+    "category_aggregation_ms": 121.11,
+    "category_counts": {
+      "MATCHED": 81600,
+      "GENUINE_MISMATCH": 19200
+    },
+    "exception_query_index": "run_category"
+  }
+}
