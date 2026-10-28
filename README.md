@@ -4,26 +4,30 @@
 [![Tests 81 passing](https://img.shields.io/badge/tests-81_passing-brightgreen.svg)](tests/)
 [![Razorpay Buildathon — Track 04](https://img.shields.io/badge/Razorpay_Buildathon-Track_04-orange.svg)](#)
 
-Matches merchant orders against aggregator settlements, auto-reconciles the clean
-majority with deterministic logic, and boxes the LLM in with a validation guard
-so it cannot hallucinate money into balancing. Every run can be saved to a
-MongoDB audit store and queried afterwards through the API.
+Matches merchant orders against aggregator settlements. Deterministic logic
+closes what it can; only the unresolved exceptions reach the LLM, and **no LLM
+claim is accepted until a validation guard has re-checked it against the raw
+ledger data**, so the model cannot hallucinate money into balancing. Every run
+can be saved to a MongoDB audit store and queried afterwards through the API.
 
 ## Results on the reference batch (63 records)
 
 | Layer | Result | Framing |
 |---|---|---|
-| Deterministic matcher | **51 / 63** auto-matched (81%) | Pure logic ceiling — no LLM involved |
+| Deterministic matcher | **51 / 63** auto-matched, 12 escalated, **0 false matches** | No LLM involved. The 51/12 split follows the generator's scenario mix (51 of every 63 records are generated clean), so the rate itself is not a quality measure; what matters is that nothing was closed that needed review. |
 | LLM classifier (Gemini 3.6 Flash, live) | **0** false reconciliations across 12 escalations | *This batch went clean — but that's not a safety guarantee at scale.* One wrong auto-reconcile moves real money. |
 | Validation guard | **6 / 6** adversarial fabrications rejected — including one arithmetically-perfect **"smart lie"** | The mandatory invariant that makes the system trustworthy regardless of what the LLM does on the next batch. |
 
-At scale (no LLM calls involved):
-- **Matcher:** 100,800 synthetic records matched in **1.9 s** with **0 false
-  auto-matches**, and the whole run saved to MongoDB in **3.9 s**
+At scale (synthetic data, no LLM calls involved):
+- **Matcher:** 100,800 records in **1.9 s**. This run exposed a real logic flaw
+  the 63-record batch hid: 72 small fee overcharges were being absorbed as
+  rounding. After the fix, **0 false auto-matches** against the generator's
+  labels, and the whole run saved to MongoDB in **3.9 s**
   ([Scale benchmark](#scale-benchmark)).
-- **Guard:** **34,000 / 34,000** mechanically generated lies rejected and
-  **16,000 / 16,000** legitimate claims accepted, 50,000 cases across 5 seeds
-  ([Guard at 50,000 cases](#guard-at-50000-cases)).
+- **Guard:** stress-tested on 50,000 generated claims across 5 seeds, with no
+  case misjudged. The claims are built from the same lie patterns the guard
+  was designed against, so this shows the checks hold across inputs, not that
+  they catch lies nobody modeled ([Guard at 50,000 cases](#guard-at-50000-cases)).
 
 ## Run it — no API key, no network
 
@@ -199,13 +203,16 @@ changes anywhere else.
   smart lies rejected and 80/80 legitimate positive controls accepted across
   140 randomized records at seed=1337.
 - **[evidence/guard_stress.json](evidence/guard_stress.json)** — the same suite
-  at 50,000 cases across 5 seeds: 34,000/34,000 lies rejected, 16,000/16,000
-  legitimate accepted (see [Guard at 50,000 cases](#guard-at-50000-cases)).
+  as a stress test at 50,000 cases across 5 seeds (34,000 generated lies,
+  16,000 legitimate claims), with any misjudged case recorded; none were
+  (see [Guard at 50,000 cases](#guard-at-50000-cases)).
 
 ## Held-out adversarial stress test
 
 Complementary evidence to `after_guard.json` (which uses the ten hand-authored
-fixtures). This suite proves the guard on data **the author did not choose**:
+fixtures). Here the **specific numbers** are randomized rather than chosen by
+the author; the **lie patterns** are still the author's, the same ones the
+guard was built to catch:
 
 - **Randomized records** — a distinct seed (`1337`, vs the main batch's `42`),
   randomized gross amounts, randomized fee rates drawn from a realistic table,
@@ -251,12 +258,15 @@ wrong ([evidence/guard_stress.json](evidence/guard_stress.json)):
 | Ghost split (invented payout legs) | 10,000 | all rejected |
 | Fee / refund claims on an orphan payout | 4,000 | all rejected |
 | Legitimate fee variance, partial refund, split | 16,000 | all accepted |
-| **Total** | **50,000** | **0 mistakes** (1.9 s) |
+| **Total** | **50,000** | no case misjudged (1.9 s) |
 
-Same scope as above: more randomized amounts, fee rates and seeds for the
-modeled lie types, not new kinds of lies. What the larger run adds is
-evidence that the checks don't depend on the particular 140 records at
-seed 1337; the original 250-case suite is unchanged.
+**Read this as a stress test, not an accuracy score.** The lies are produced
+by code written alongside the guard, from the patterns the guard checks, so a
+perfect result is expected. What the run shows is that the checks hold across
+tens of thousands of randomized amounts, fee rates and seeds, and don't depend
+on the particular 140 records at seed 1337. It cannot show the guard catches a
+kind of lie nobody modeled; for that, the guard fails closed on anything it
+can't verify. The original 250-case suite is unchanged.
 
 ```bash
 python scripts/stress_guard.py                       # 50,000 cases
@@ -419,12 +429,18 @@ Result on one laptop (MongoDB 7 in Docker on the same machine),
 | Measure | 100,800 records |
 |---|---|
 | Matcher | **1.9 s** (~53,000 records/s) |
-| Auto-matched | 81,600 (81.0%), the same rate as the 63-record batch |
+| Auto-matched | 81,600 (81.0%), a rate set by the generator's scenario mix, not by the matcher |
 | False auto-matches (closed a record that needed review) | **0** |
 | Missed matches (escalated a record it could have closed) | 0 |
 | MongoDB: save the run (100,800 documents) | **3.9 s** (~25,700 docs/s) |
 | MongoDB: first 100 GENUINE_MISMATCH records | 6.7 ms, via the `run_category` index |
 | MongoDB: category breakdown (aggregation) | 121 ms |
+
+**What the false-match count means.** It is scored against the generator's
+own labels, so it is synthetic-data evidence, not real-world accuracy. Its
+value was exposing a flaw in the matching logic (below) that a fee change
+small enough to fit inside the rounding tolerance would trigger on real data
+too. Testing on real settlement files is the next step.
 
 **Scope.** This covers the deterministic layers. The LLM classifier is not
 called at this scale: escalations have no recorded responses, and thousands
