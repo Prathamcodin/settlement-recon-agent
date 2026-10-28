@@ -1,0 +1,76 @@
+{
+  "generated_at": "2026-10-28T15:25:32.047734+00:00",
+  "scale": 40,
+  "seeds": [
+    1337,
+    2024,
+    7,
+    99,
+    31337
+  ],
+  "cases_total": 50000,
+  "adversarial": {
+    "total": 34000,
+    "rejected_by_guard": 34000,
+    "accepted_by_mistake": 0
+  },
+  "legit": {
+    "total": 16000,
+    "accepted_by_guard": 16000,
+    "rejected_by_mistake": 0
+  },
+  "cases_by_type": {
+    "ghost_split_lie": 10000,
+    "legit_fee_variance": 6000,
+    "legit_partial_refund": 6000,
+    "legit_split": 4000,
+    "orphan_fee_lie": 2000,
+    "orphan_refund_lie": 2000,
+    "smart_fee_lie": 10000,
+    "wrong_status_refund_lie": 10000
+  },
+  "seconds": 1.9,
+  "per_seed": [
+    {
+      "seed": 1337,
+      "cases": 10000,
+      "adversarial_rejected": 6800,
+      "adversarial_total": 6800,
+      "legit_accepted": 3200,
+      "legit_total": 3200
+    },
+    {
+      "seed": 2024,
+      "cases": 10000,
+      "adversarial_rejected": 6800,
+      "adversarial_total": 6800,
+      "legit_accepted": 3200,
+      "legit_total": 3200
+    },
+    {
+      "seed": 7,
+      "cases": 10000,
+      "adversarial_rejected": 6800,
+      "adversarial_total": 6800,
+      "legit_accepted": 3200,
+      "legit_total": 3200
+    },
+    {
+      "seed": 99,
+      "cases": 10000,
+      "adversarial_rejected": 6800,
+      "adversarial_total": 6800,
+      "legit_accepted": 3200,
+      "legit_total": 3200
+    },
+    {
+      "seed": 31337,
+      "cases": 10000,
+      "adversarial_rejected": 6800,
+      "adversarial_total": 6800,
+      "legit_accepted": 3200,
+      "legit_total": 3200
+    }
+  ],
+  "failures": []
+}
