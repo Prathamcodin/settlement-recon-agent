@@ -1,7 +1,10 @@
 google-genai~=2.19
 pandas~=2.2
 fastapi~=0.115
+python-multipart~=0.0.20
 uvicorn~=0.32
 python-dotenv~=1.0
+pymongo~=4.10
 pytest~=8.3
+mongomock~=4.3
 rich~=13.9

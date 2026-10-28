@@ -111,6 +111,11 @@ def parse_response(raw_text: str) -> dict:
     but strip code fences defensively — any deeper failure should
     propagate: an unparseable response IS a data point about model
     reliability.
+
+    Numbers with a fractional part are kept as their exact decimal text
+    (parse_float=str). The prompt asks for money as decimal strings; a
+    model that returns `"actual_fee": 63.42` instead gets "63.42", never
+    the float 63.42, so no float enters the pipeline from here.
     """
     text = raw_text.strip()
     if text.startswith("```"):
@@ -119,7 +124,7 @@ def parse_response(raw_text: str) -> dict:
         while lines and lines[-1].strip().startswith("```"):
             lines.pop()
         text = "\n".join(lines).strip()
-    return json.loads(text)
+    return json.loads(text, parse_float=str)
 
 
 # --------------------------------------------------------------------------
