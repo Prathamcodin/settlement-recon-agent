@@ -22,6 +22,9 @@ Strategies (audit-log values):
       no_payouts_found             — order has no payout anywhere
       all_payouts_out_of_window    — order has payouts, none in-window
       amount_mismatch              — 1 payout in-window, gap > tolerance
+      fee_mismatch                 — 1 payout in-window, fee_charged differs
+                                     from expected_fee (even if the gap
+                                     itself is inside tolerance)
       split_incomplete             — 2+ payouts, sum off (see reason tag)
       orphan_payout                — payout references unknown order_ref
 
@@ -198,11 +201,22 @@ def _decide_for_order(
     is_split_candidate = (len(in_pays) + len(out_pays)) >= 2
     within_tol = gap <= tol
 
-    # A MATCH requires within-tolerance closure AND (for splits) no late legs.
+    # The tolerance exists to absorb rounding drift, and rounding never
+    # changes the fee. If the aggregator charged a different fee than the
+    # merchant expected, the gap is a fee variance, however small: on a
+    # ₹100 order a GST-on-fee overcharge is ~₹0.40, under the ₹0.50 floor,
+    # yet it is a systematic charge worth flagging. A 100,800-record run
+    # (scripts/scale_benchmark.py) showed 72 such orders being absorbed as
+    # rounding before this check.
+    fee_mismatch = (not is_split_candidate
+                    and in_pays[0].fee_charged != order.expected_fee)
+
+    # A MATCH requires within-tolerance closure, an unchanged fee (single
+    # payouts) AND (for splits) no late legs.
     # Rationale: even if the in-window sum happens to reconcile, the presence
     # of an out-of-window sibling means more money is coming or something is
     # duplicated — either way, escalate.
-    if within_tol and not out_pays:
+    if within_tol and not out_pays and not fee_mismatch:
         if is_split_candidate:
             strategy = "split_sum"
             reason = (
@@ -257,6 +271,24 @@ def _decide_for_order(
             tolerance_used=tol,
             tolerance_gap=gap,
             reason=f"[{reason_tag}] Split candidate: {body}",
+        )
+
+    if fee_mismatch and within_tol:
+        p = in_pays[0]
+        return MatchDecision(
+            key=key,
+            status="UNMATCHED_ESCALATE",
+            strategy="fee_mismatch",
+            matched_payout_ids=in_ids,
+            out_of_window_payout_ids=out_ids,
+            tolerance_used=tol,
+            tolerance_gap=gap,
+            reason=(
+                f"Single payout Rs.{sum_settled} vs net_expected "
+                f"Rs.{order.net_expected} (gap Rs.{gap}, within tolerance "
+                f"Rs.{tol}), but fee_charged Rs.{p.fee_charged} != "
+                f"expected_fee Rs.{order.expected_fee}; not rounding."
+            ),
         )
 
     return MatchDecision(
