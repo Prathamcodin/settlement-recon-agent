@@ -433,8 +433,15 @@ def _case_to_classified(case: HeldoutCase, key: str) -> ClassifiedRecord:
     )
 
 
-def run_heldout_suite(seed: int = 1337, mix: dict[str, int] = None) -> dict:
-    """Generate the batch, spawn every case, run the guard, return results."""
+def run_heldout_suite(seed: int = 1337, mix: dict[str, int] = None, scale: int = 1) -> dict:
+    """Generate the batch, spawn every case, run the guard, return results.
+
+    `scale` multiplies every scenario count in the mix (scale=1 is the
+    250-case suite behind evidence/heldout_guard.json).
+    """
+    if scale < 1:
+        raise ValueError("scale must be >= 1")
+    mix = {k: v * scale for k, v in (mix or DEFAULT_MIX).items()}
     records = generate_heldout_batch(seed=seed, mix=mix)
     cases = make_cases(records)
     outcomes: list[dict[str, Any]] = []

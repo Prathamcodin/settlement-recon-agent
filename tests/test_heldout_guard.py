@@ -79,3 +79,12 @@ def test_heldout_suite_is_reproducible():
     v1 = [o["guard_verdict"] for o in r1["outcomes"]]
     v2 = [o["guard_verdict"] for o in r2["outcomes"]]
     assert v1 == v2
+
+
+def test_guard_holds_across_seeds_at_larger_scale():
+    """3 seeds x 4x the suite = 3,000 cases (scripts/stress_guard.py runs 50,000)."""
+    for seed in (2024, 7, 31337):
+        results = run_heldout_suite(seed=seed, scale=4)
+        assert results["cases_total"] == 1000
+        assert results["adversarial"]["false_positives"] == 0, f"seed {seed}: a lie got through"
+        assert results["legit"]["false_rejections"] == 0, f"seed {seed}: a legit case was rejected"
