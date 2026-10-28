@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -59,7 +60,12 @@ def main() -> None:
                         help="Optional path to write the full JSON report.")
     parser.add_argument("--plain", action="store_true",
                         help="Force plain-text output even if rich is available.")
+    parser.add_argument("--save", action="store_true",
+                        help="Save the run to the MongoDB audit store (requires MONGO_URL).")
     args = parser.parse_args()
+
+    if args.save and not os.environ.get("MONGO_URL"):
+        parser.error("--save needs MONGO_URL, e.g. MONGO_URL=mongodb://localhost:27017")
 
     use_rich = _HAS_RICH and not args.plain
 
@@ -136,6 +142,10 @@ def _run_rich(args, console, orders_path, payouts_path) -> None:
         args.out.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
         console.print(f"\n[dim]wrote full JSON report to[/] {args.out}")
 
+    if args.save:
+        run_id = _save_run(report, orders, payouts)
+        console.print(f"\n[green]saved[/] run [bold]{run_id}[/] to the MongoDB audit store")
+
 
 def _run_plain(args, orders_path, payouts_path) -> None:
     if args.regen or not orders_path.exists() or not payouts_path.exists():
@@ -171,6 +181,15 @@ def _run_plain(args, orders_path, payouts_path) -> None:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"\nWrote full JSON report to {args.out}")
+
+    if args.save:
+        print(f"\nSaved run {_save_run(report, orders, payouts)} to the MongoDB audit store")
+
+
+def _save_run(report: dict, orders, payouts) -> str:
+    from src.store.mongo_store import batch_fingerprint, store_from_env
+    return store_from_env().save_run(report, source="cli",
+                                     input_fingerprint=batch_fingerprint(orders, payouts))
 
 
 def _read_json_if_present(path: Path):

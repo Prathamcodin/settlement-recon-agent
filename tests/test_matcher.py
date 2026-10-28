@@ -288,3 +288,27 @@ def test_end_to_end_matches_deterministic_ceiling(tmp_path):
     assert strategies.count("split_incomplete") == SCENARIO_MIX["split_payout_messy"]
     # Orphan -> exactly one.
     assert strategies.count("orphan_payout") == SCENARIO_MIX["genuine_mismatch_orphan"]
+
+
+# --- fee variance hidden inside the rounding tolerance --------------------
+
+def test_small_fee_variance_inside_tolerance_is_escalated_not_absorbed():
+    # Real case from the 100,800-record scale run: a ₹138.13 card order where
+    # the merchant expected a flat 2% fee (₹2.76) and the aggregator charged
+    # 2% + GST (₹3.26). The ₹0.50 gap fits under the ₹0.50 rounding floor,
+    # but rounding never changes the fee, so this must not auto-match.
+    o = make_order("ORD-0409", gross="138.13", fee="2.76")
+    p = make_payout("PYT-0438", "ORD-0409", settled="134.87", fee="3.26")
+    [d] = match_batch([o], [p], recon_date=RECON, window=WINDOW)
+    assert d.status == "UNMATCHED_ESCALATE"
+    assert d.strategy == "fee_mismatch"
+    assert "fee_charged Rs.3.26" in d.reason
+
+
+def test_rounding_drift_with_unchanged_fee_still_matches():
+    # The control: same size of gap, but the fee is what the merchant expected.
+    o = make_order("ORD-1", gross="138.13", fee="2.76")
+    p = make_payout("PYT-1", "ORD-1", settled="134.87", fee="2.76")
+    [d] = match_batch([o], [p], recon_date=RECON, window=WINDOW)
+    assert d.status == "MATCHED"
+    assert d.strategy == "within_tolerance"
