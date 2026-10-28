@@ -14,10 +14,14 @@ import pytest
 
 try:
     from fastapi.testclient import TestClient
-    from src.api.app import app
+    from src.api.app import app, get_store
     _HAS_FASTAPI = True
 except ImportError:
     _HAS_FASTAPI = False
+
+import mongomock
+
+from src.store.mongo_store import AuditStore
 
 
 pytestmark = pytest.mark.skipif(not _HAS_FASTAPI, reason="fastapi not installed")
@@ -25,7 +29,20 @@ pytestmark = pytest.mark.skipif(not _HAS_FASTAPI, reason="fastapi not installed"
 
 @pytest.fixture
 def client():
-    return TestClient(app)
+    """API with no audit store, as when MONGO_URL is unset."""
+    app.dependency_overrides[get_store] = lambda: None
+    yield TestClient(app)
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def stored_client():
+    """API backed by an in-memory MongoDB (mongomock)."""
+    store = AuditStore(mongomock.MongoClient()["recon_api_test"])
+    store.ensure_indexes()
+    app.dependency_overrides[get_store] = lambda: store
+    yield TestClient(app)
+    app.dependency_overrides.clear()
 
 
 def test_root_advertises_replay_only(client):
@@ -93,3 +110,61 @@ def test_reconcile_post_returns_422_on_replay_miss(client, tmp_path):
         })
     assert r.status_code == 422
     assert "ORD-NOCACHE" in r.json()["detail"]
+
+
+# --------------------------------------------------------------------------
+# Audit store endpoints
+# --------------------------------------------------------------------------
+
+def test_runs_endpoints_answer_503_without_a_store(client):
+    r = client.get("/runs")
+    assert r.status_code == 503
+    assert "MONGO_URL" in r.json()["detail"]
+
+
+def test_reconcile_without_a_store_has_no_run_id(client):
+    r = client.get("/reconcile/sample")
+    assert r.status_code == 200
+    assert "run_id" not in r.json()
+
+
+def test_reconcile_saves_run_and_runs_endpoints_query_it(stored_client):
+    r = stored_client.get("/reconcile/sample")
+    assert r.status_code == 200, r.text
+    run_id = r.json()["run_id"]
+
+    runs = stored_client.get("/runs").json()["runs"]
+    assert [x["run_id"] for x in runs] == [run_id]
+
+    run = stored_client.get(f"/runs/{run_id}").json()
+    assert run["source"] == "sample"
+    assert run["counts"]["total_records"] == 63
+    assert sum(run["category_counts"].values()) == 63
+
+    exc = stored_client.get(f"/runs/{run_id}/decisions",
+                            params={"exceptions_only": "true"}).json()
+    assert exc["count"] == 12
+    assert all(d["final_category"] != "MATCHED" for d in exc["decisions"])
+
+    one = stored_client.get(f"/runs/{run_id}/decisions/ORD-0006").json()
+    assert one["key"] == "ORD-0006"
+    assert one["guard_checks"]
+
+
+def test_runs_endpoints_404_on_unknown_ids(stored_client):
+    assert stored_client.get("/runs/nope").status_code == 404
+    assert stored_client.get("/runs/nope/decisions").status_code == 404
+    run_id = stored_client.get("/reconcile/sample").json()["run_id"]
+    assert stored_client.get(f"/runs/{run_id}/decisions/ORD-9999").status_code == 404
+
+
+def test_rerunning_the_same_input_reports_earlier_runs(stored_client):
+    first = stored_client.get("/reconcile/sample").json()
+    second = stored_client.get("/reconcile/sample").json()
+    assert first["previous_runs_with_same_input"] == 0
+    assert second["previous_runs_with_same_input"] == 1
+    assert first["input_fingerprint"] == second["input_fingerprint"]
+    assert first["run_id"] != second["run_id"]
+
+    same = stored_client.get("/runs", params={"input_fingerprint": first["input_fingerprint"]}).json()
+    assert {r["run_id"] for r in same["runs"]} == {first["run_id"], second["run_id"]}

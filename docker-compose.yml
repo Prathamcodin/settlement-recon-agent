@@ -1,4 +1,4 @@
-# Two services, both built from the same image.
+# Two services, both built from the same image, plus MongoDB for the API.
 #
 #   docker compose up
 #     -> runs the full pipeline once and prints the summary to stdout.
@@ -6,9 +6,10 @@
 #        verified in step 5.
 #
 #   docker compose --profile api up
-#     -> additionally starts the FastAPI /reconcile service on :8000.
-#        Classifier is replay-only; matcher and guard run live on
-#        uploaded CSVs.
+#     -> additionally starts MongoDB and the FastAPI /reconcile service on
+#        :8000. Classifier is replay-only; matcher and guard run live on
+#        uploaded CSVs. Every run is saved to MongoDB and can be queried
+#        through the /runs endpoints.
 #
 services:
   agent:
@@ -16,10 +17,25 @@ services:
     image: recon-agent:latest
     # Inherits the Dockerfile CMD (python run.py).
 
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    profiles: ["api"]
+
   api:
     build: .
     image: recon-agent:latest
     command: ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      MONGO_URL: mongodb://mongo:27017
     ports:
       - "8000:8000"
+    depends_on:
+      - mongo
     profiles: ["api"]
+
+volumes:
+  mongo-data:
