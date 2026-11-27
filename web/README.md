@@ -19,7 +19,7 @@ npm run dev
 
 | Variable       | Default                 | Purpose                         |
 | -------------- | ----------------------- | ------------------------------- |
-| `VITE_API_URL` | `http://localhost:8000` | Base URL of the FastAPI backend |
+| `VITE_API_URL` | dev: `http://localhost:8000`, build: `/api` | Base URL of the FastAPI backend |
 
 Copy `.env.example` to `.env.local` to override it.
 
@@ -30,5 +30,5 @@ Copy `.env.example` to `.env.local` to override it.
 - `npm run lint` — ESLint
 - `npm run preview` — serve the production build
 
-`vercel.json` and `public/_redirects` send every route to `index.html`, so deep links
-such as `/runs/<id>` work on Vercel and Netlify.
+On Vercel the repo-root `vercel.json` builds this folder and sends every non-API route to
+`index.html`, so deep links such as `/runs/<id>` work; `public/_redirects` does the same on Netlify.

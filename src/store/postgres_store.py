@@ -81,9 +81,14 @@ class PostgresAuditStore:
         if not _SCHEMA_NAME.match(schema):
             raise ValueError(f"invalid schema name {schema!r}")
         self.schema = schema
+        # check: serverless hosts freeze between requests and Neon closes idle
+        # connections, so test each one before handing it out.
+        # prepare_threshold=None: no server-side prepared statements, which
+        # transaction-mode poolers such as PgBouncer cannot track.
         self.pool = ConnectionPool(
             url, min_size=min_size, max_size=max_size, open=True,
-            kwargs={"row_factory": dict_row},
+            kwargs={"row_factory": dict_row, "prepare_threshold": None},
+            check=ConnectionPool.check_connection,
         )
         self._schema = sql.Identifier(schema)
 

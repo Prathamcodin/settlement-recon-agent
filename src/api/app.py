@@ -62,7 +62,7 @@ from src.store import store_from_env
 from src.store.base import RunStore
 from src.store.mongo_store import batch_fingerprint
 
-SAMPLE_DIR = Path("data")
+SAMPLE_DIR = Path(os.environ.get("SAMPLE_DIR", "data"))  # /tmp on read-only hosts
 SAMPLE_SEED = 42  # the seed the committed LLM recordings were captured on
 
 MAX_UPLOAD_BYTES = int(os.environ.get("MAX_UPLOAD_BYTES", 2 * 1024 * 1024))
