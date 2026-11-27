@@ -1,0 +1,17 @@
+# Render Blueprint: the FastAPI service. The database is an external
+# PostgreSQL (e.g. Neon free tier) passed in as DATABASE_URL, and the
+# dashboard is a static site on Vercel or Netlify (see README "Deploy").
+services:
+  - type: web
+    name: recon-agent-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    dockerCommand: sh -c "uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"
+    envVars:
+      - key: DATABASE_URL
+        sync: false          # paste the Neon connection string in the Render dashboard
+      - key: ALLOWED_ORIGINS
+        sync: false          # the dashboard's URL, e.g. https://recon-agent.vercel.app
+      - key: TRUST_PROXY_HEADERS
+        value: "1"           # rate-limit by the visitor's IP, not Render's proxy

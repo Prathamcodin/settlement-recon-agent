@@ -1,14 +1,41 @@
 # Settlement Reconciliation Agent
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests 81 passing](https://img.shields.io/badge/tests-81_passing-brightgreen.svg)](tests/)
+[![CI](https://github.com/Prathamcodin/settlement-recon-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Prathamcodin/settlement-recon-agent/actions/workflows/ci.yml)
+[![Tests 127](https://img.shields.io/badge/tests-127-brightgreen.svg)](tests/)
 [![Razorpay Buildathon — Track 04](https://img.shields.io/badge/Razorpay_Buildathon-Track_04-orange.svg)](#)
 
 Matches merchant orders against aggregator settlements. Deterministic logic
 closes what it can; only the unresolved exceptions reach the LLM, and **no LLM
 claim is accepted until a validation guard has re-checked it against the raw
 ledger data**, so the model cannot hallucinate money into balancing. Every run
-can be saved to a MongoDB audit store and queried afterwards through the API.
+is saved to an audit store (PostgreSQL or MongoDB) and can be explored in a
+React dashboard or queried through the API.
+
+## Web dashboard
+
+A React + TypeScript dashboard ([web/](web/)) over the FastAPI service:
+
+- **Run** the reference batch, a freshly generated batch from any seed, or
+  your own two CSVs.
+- **Results**: headline counts, the final-category breakdown, where each
+  record was decided, and a filterable table. Click any record for its full
+  audit trail: the raw ledger and settlement rows, the matcher's reason, the
+  LLM's claim, and every guard check with pass or fail.
+- **Guard Lab**: the hand-crafted lies from `tests/fixtures/` run through the
+  real guard on request, with the "smart lie" broken down number by number.
+- **History**: every saved run, reopenable by its URL.
+
+![Run results](docs/screenshots/results.png)
+![Audit trail for one record](docs/screenshots/audit-trail.png)
+![Guard Lab: the smart lie](docs/screenshots/guard-lab.png)
+
+```bash
+# terminal 1: PostgreSQL + API on :8000
+docker compose --profile api up
+# terminal 2: dashboard on :5173
+cd web && npm install && npm run dev
+```
 
 ## Results on the reference batch (63 records)
 
@@ -173,11 +200,13 @@ changes anywhere else.
 | [src/classifier/prompt.py](src/classifier/prompt.py) | The fair strict-JSON classification prompt |
 | [src/guard/](src/guard/) | Layer 3 — validation guard with per-category invariant checks |
 | [src/reporter/](src/reporter/) | Layer 4 — report builder + text summary formatter |
-| [src/api/](src/api/) | FastAPI `/reconcile` surface (replay-only) |
+| [src/api/](src/api/) | FastAPI service: pipeline endpoints, upload checks, rate limiting, `/runs`, `/guard/cases` |
+| [src/guard/cases.py](src/guard/cases.py) | Runs the hand-crafted guard fixtures live for the API and Guard Lab |
+| [web/](web/) | React + TypeScript dashboard (Vite) |
 | [src/tolerance.py](src/tolerance.py) | `max(Rs.0.50, 0.1% × gross)` — shared by matcher, guard, generator |
 | [src/models.py](src/models.py) | Shared dataclasses: `Order`, `Payout`, `MatchDecision` |
-| [src/store/](src/store/) | MongoDB audit store: every run and its per-record audit trail, queryable |
-| [tests/](tests/) | 81 tests (+5 that run against a real MongoDB): matcher, classifier, guard, reporter, API, store, generator |
+| [src/store/](src/store/) | Audit store behind one interface: PostgreSQL and MongoDB backends, every run and its per-record audit trail |
+| [tests/](tests/) | 127 tests: matcher, classifier, guard, reporter, API, both stores (in memory and on real servers), generator |
 | [tests/fixtures/](tests/fixtures/) | Hand-crafted LLM-shaped adversarial + positive fixtures |
 | [evidence/](evidence/) | Live-recorded LLM output + before/after-guard artifacts |
 | [scripts/](scripts/) | Evaluation scripts (`capture_before_guard.py`, `capture_after_guard.py`, `scale_benchmark.py`, `stress_guard.py`) |
@@ -295,38 +324,92 @@ prompt that produced them.
 ## FastAPI `/reconcile`
 
 ```bash
-docker compose --profile api up      # starts MongoDB + the API
+docker compose --profile api up      # starts PostgreSQL + the API
 # then:
 curl http://localhost:8000/reconcile/sample | jq
 ```
 
 Endpoints:
 
-- `GET /` — health + capability description
+- `GET /` — capability description; `GET /health` — liveness
 - `GET /reconcile/sample` — runs the pipeline on the committed batch (no upload)
+- `POST /reconcile/generate?seed=N` — generates a fresh batch and runs it
+  (seed 42 reproduces the reference batch)
 - `POST /reconcile` — accepts multipart uploads of `orders` + `settlements`
-  CSVs; runs the full pipeline; returns the JSON report
+  CSVs; runs the full pipeline; returns the JSON report, including each
+  record's raw ledger and settlement rows
+- `GET /sample/orders.csv`, `GET /sample/settlements.csv` — the input format
+- `GET /guard/cases` — the hand-crafted guard fixtures, judged live
 - `GET /runs`, `GET /runs/{run_id}`, `GET /runs/{run_id}/decisions`,
   `GET /runs/{run_id}/decisions/{key}` — query saved runs
-  (see [Audit store](#audit-store-mongodb))
+  (see [Audit store](#audit-store-postgresql-or-mongodb))
 
-**Design note.** The matcher and the guard execute **live** on any uploaded
-CSVs — pure logic, no cache. The LLM classifier is **replay-only** — reads from
-`evidence/llm_raw/`. If an uploaded batch escalates a record whose key has no
-cached response, the endpoint returns HTTP 422 with the missing key. This is a
-deliberate reproducibility boundary, not a bug: the service cannot go rogue on
-demo day, cannot generate new bills, and cannot silently accept whatever the
-model says next. Recording new evidence remains a CLI operation
-(`run.py --record-live`) where a human is present to approve API calls.
+**Design note: no live LLM calls, and no borrowed answers.** The matcher and
+the guard execute **live** on any batch. The LLM classifier is
+**replay-only**: it reads recordings from `evidence/llm_raw/`, so the public
+service cannot go rogue on demo day or run up a bill. Recordings are keyed by
+record id, so plain replay would hand the answer recorded for `ORD-0006` in the
+reference batch to any upload containing an `ORD-0006` with different
+amounts. The API therefore replays a recording **only when the prompt it was
+captured with is byte-identical to the prompt this record produces now**,
+i.e. the model saw exactly this data
+([`replay_matching_recordings`](src/classifier/classify.py)). Every other
+escalation comes back as `NEEDS_REVIEW`: nothing claimed, nothing
+auto-cleared, parked for a person. Recording new evidence remains a CLI
+operation (`run.py --record-live`) where a human is present to approve API
+calls.
 
-## Audit store (MongoDB)
+**Public-demo protections.** Uploads are capped (2 MB and 5,000 rows per
+file by default), CSVs are checked for their columns and readable amounts and
+timestamps with a plain-language 400 error, and the pipeline endpoints are
+rate limited per client with an in-process token bucket (20-request burst,
+20 per minute). Behind a proxy (`TRUST_PROXY_HEADERS=1`) the client is the
+first `X-Forwarded-For` address. One instance needs no more than this; several
+would keep the buckets in Redis, as in
+[high-concurrency-rate-limiter](https://github.com/Prathamcodin/high-concurrency-rate-limiter).
+
+## Audit store (PostgreSQL or MongoDB)
 
 A report printed once can't answer the questions a reconciliation team asks
 afterwards: *"which records in Tuesday's batch were forced to
-GENUINE_MISMATCH?"*, *"show me the full audit trail for ORD-0006"*. When
-`MONGO_URL` is set, every run (API or `python run.py --save`) is saved to
-MongoDB and the `/runs` endpoints query it. Without `MONGO_URL` everything
-works as before and `/runs` answers 503.
+GENUINE_MISMATCH?"*, *"show me the full audit trail for ORD-0006"*. With
+`DATABASE_URL` (PostgreSQL) or `MONGO_URL` (MongoDB) set, every API run is
+saved and the `/runs` endpoints query it (`python run.py --save` uses
+MongoDB). With neither, everything works as before and `/runs` answers 503.
+
+Both backends implement one interface
+([src/store/base.py](src/store/base.py)), and
+[tests/test_store_contract.py](tests/test_store_contract.py) runs the same 11
+behaviour tests against each: round trip, database-computed category counts,
+filters and pagination, slim list rows versus the full audit trail,
+newest-first listing, fingerprint-linked re-runs, exact money, **a float is
+refused and nothing is written**, and **a save that fails part-way leaves no
+visible run**.
+
+### PostgreSQL backend
+
+[src/store/postgres_store.py](src/store/postgres_store.py), used by the
+deployed service.
+
+| Table | One row per | Keys and indexes |
+|---|---|---|
+| `runs` | batch run: source, time, counts (JSONB), input fingerprint | `run_id` primary key, `seq BIGSERIAL` for strict newest-first order, index on `input_fingerprint` |
+| `decisions` | record in a run | primary key `(run_id, key)`, foreign key to `runs` with `ON DELETE CASCADE`, index on `(run_id, final_category)` |
+
+The fields reviewers filter on (`final_category`, `guard_verdict`,
+`llm_category`, ...) are real columns; the rest of the audit trail, whose
+shape depends on the category, is one JSONB document per decision, so a read
+of one record needs no joins. The order's gross amount is also a
+`NUMERIC(14,2)` column, so SQL can ask exact money questions ("exceptions
+over Rs.1,000") without a float.
+
+**Atomic by transaction.** A run and all its decisions are written in **one
+transaction**, with the decisions bulk-loaded through `COPY`. A crash
+mid-save leaves nothing, so the MongoDB store's `"writing"` flag and purge
+below are not needed here. Floats are refused before the transaction opens,
+exactly as in the MongoDB store.
+
+### MongoDB backend
 
 ```bash
 docker compose --profile api up -d mongo
@@ -348,9 +431,10 @@ whose shape depends on its category: a clean match has no LLM fields at all;
 an escalation carries the LLM's claim (`actual_fee` for a fee variance,
 `refund_amount` for a refund, leg ids for a split) and a variable-length list
 of guard checks. In MongoDB it is stored and read back exactly as the
-reporter builds it. In SQL it would need separate tables for decisions,
-claims and guard checks, joined on every read, plus a JSON column for the
-free-form claim anyway.
+reporter builds it. A fully normalised SQL schema would need separate tables
+for decisions, claims and guard checks, joined on every read; the PostgreSQL
+backend above avoids that by keeping the trail as one JSONB document beside
+the filter columns.
 
 **Two collections** ([src/store/mongo_store.py](src/store/mongo_store.py)):
 
@@ -407,9 +491,11 @@ order, so repeats are visible: the response says
 `GET /runs?input_fingerprint=...` lists every run of that input.
 
 **Tests.** The store and endpoints are tested against `mongomock` (in-memory,
-no server) in the normal suite, and against a real MongoDB in
-[tests/test_store_integration.py](tests/test_store_integration.py), which runs
-when `MONGO_URL` is set.
+no server) in the normal suite, against a real MongoDB in
+[tests/test_store_integration.py](tests/test_store_integration.py) when
+`MONGO_URL` is set, and against a real PostgreSQL in
+[tests/test_store_contract.py](tests/test_store_contract.py) when
+`TEST_DATABASE_URL` is set. CI sets both, and fails if any test is skipped.
 
 ## Scale benchmark
 
@@ -475,8 +561,11 @@ byte-identical to before, so the committed LLM recordings still line up.
 python -m pytest tests/
 ```
 
-**81 tests, all green**, plus 5 that run against a real MongoDB when
-`MONGO_URL` is set. On a fresh clone the reference batch is generated
+**127 tests.** 5 need a real MongoDB (`MONGO_URL`) and 12 a real PostgreSQL
+(`TEST_DATABASE_URL`); without them those are skipped and the other 110 run
+anywhere. [CI](.github/workflows/ci.yml) starts both databases, runs all 127,
+and fails the build if any test is skipped; a second job type-checks, lints
+and builds the dashboard. On a fresh clone the reference batch is generated
 automatically ([tests/conftest.py](tests/conftest.py)). Coverage by layer:
 
 | Suite | Tests | What they prove |
@@ -485,11 +574,27 @@ automatically ([tests/conftest.py](tests/conftest.py)). Coverage by layer:
 | `test_classifier.py` | 13 | Record/replay mechanics, backend Protocol satisfaction via fake, safe-filename handling, missing-response error |
 | `test_guard.py` | 15 | Parametrized over every fixture (adversarial rejected, positive accepted), smart-lie reason string, reconciles=false counterfactual logging, unknown-category rejection |
 | `test_reporter.py` | 4 | Report shape, guard-reject rendering, **two-labeled-facts invariant** (Live batch and Guard test as separate lines), graceful missing-evidence handling |
-| `test_api.py` | 9 | Root advertises replay-only, `GET /reconcile/sample` returns stable numbers, `POST /reconcile` round-trips uploads, replay-miss returns 422, runs saved and queried through `/runs`, re-runs of one input linked by fingerprint, 404s, 503 without a store |
+| `test_api.py` | 27 | Root advertises replay-only, `GET /reconcile/sample` returns stable numbers, `POST /reconcile` round-trips uploads, an escalation with no recording is `NEEDS_REVIEW`, **a recording for different numbers is not replayed**, records carry their raw rows, generated batches (seed 42 reproduces the reference), readable 400s for bad CSVs, 413 for oversized uploads, BOM-prefixed CSVs accepted, sample downloads, guard cases endpoint, token-bucket refill and eviction, 429 with `Retry-After`, runs saved and queried through `/runs`, re-runs linked by fingerprint, 404s, 503 without a store |
+| `test_store_contract.py` | 23 | The same 11 behaviour tests on mongomock and on real PostgreSQL, plus exact `NUMERIC` money in PostgreSQL |
 | `test_store.py` | 17 | Save and query runs, aggregation agrees with the report, category and exception filters, full audit trail, run isolation, half-written runs hidden, abandoned runs purged (in-progress ones kept, no orphans if the purge dies halfway), Decimal and decimal strings stored exactly, **saving a float raises and writes nothing**, LLM JSON numbers parsed as exact text, input fingerprint, indexes |
 | `test_generator_scale.py` | 3 | `--scale` multiplies every scenario, scaled keys are unique, scale 1 is byte-identical to the reference batch |
 | `test_store_integration.py` | 5 | Real MongoDB: round trip and aggregation, exception query uses the `run_category` index, unique key per run enforced, exact Decimal128 money and float rejection, abandoned-run purge (skipped without `MONGO_URL`) |
 | `test_heldout_guard.py` | 5 | Held-out suite generates >=100 adversarial + >=30 legit cases, guard rejects all 170 mechanically-generated smart lies at seed=1337, guard accepts all 80 legitimate positive controls, seed reproducibility, 3,000 more cases across 3 other seeds |
+
+## Deploy
+
+Three free-tier pieces:
+
+| Piece | Where | Config |
+|---|---|---|
+| API | [Render](https://render.com) web service from the Dockerfile | [render.yaml](render.yaml): health check on `/health`, uvicorn on `$PORT` |
+| Database | [Neon](https://neon.tech) PostgreSQL | its connection string as `DATABASE_URL` on Render; tables are created on first connect |
+| Dashboard | [Vercel](https://vercel.com) or [Netlify](https://netlify.com), root `web/` | build `npm run build`, output `dist`, env `VITE_API_URL` = the Render URL; SPA rewrites in [web/vercel.json](web/vercel.json) and [web/public/_redirects](web/public/_redirects) |
+
+Set `ALLOWED_ORIGINS` on Render to the dashboard's URL so the browser may call
+the API. Render's free tier sleeps when idle; the dashboard pings `/health`
+on load and tells the visitor the server is waking up (about 30–60 s) instead
+of looking broken.
 
 ## What we deliberately did NOT do
 

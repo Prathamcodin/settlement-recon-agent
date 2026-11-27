@@ -23,11 +23,11 @@ from collections import Counter
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from decimal import Decimal
-from typing import Optional
+from typing import Iterable, Optional
 
 from src.classifier.classify import ClassifiedRecord
 from src.guard.verify import GuardVerdict
-from src.models import MatchDecision
+from src.models import MatchDecision, Order, Payout
 
 
 @dataclass
@@ -45,16 +45,67 @@ class RecordReport:
     guard_reason: Optional[str] = None
     guard_checks: list[dict] = field(default_factory=list)
     final_category: str = ""
+    # The raw rows behind the decision, so a reviewer (or the dashboard)
+    # can check every number without opening the CSVs. Money stays as
+    # decimal strings. Filled only when build_report is given the batch.
+    order: Optional[dict] = None
+    payouts: list[dict] = field(default_factory=list)
+
+
+# Escalations with no classification for this exact data. Not a verdict:
+# the record is parked for a human instead of being guessed.
+NEEDS_REVIEW = "NEEDS_REVIEW"
+NEEDS_REVIEW_REASON = (
+    "No recorded LLM classification exists for this exact data, and the "
+    "service makes no live LLM calls, so nothing was claimed and nothing "
+    "was auto-reconciled. Parked for human review."
+)
+
+
+def _order_row(o: Order) -> dict:
+    return {
+        "order_id": o.order_id,
+        "gross_amount": str(o.gross_amount),
+        "expected_fee": str(o.expected_fee),
+        "net_expected": str(o.net_expected),
+        "status": o.status,
+        "created_at": o.created_at.isoformat(),
+    }
+
+
+def _payout_row(p: Payout, in_window: bool) -> dict:
+    return {
+        "payout_id": p.payout_id,
+        "order_ref": p.order_ref,
+        "settled_amount": str(p.settled_amount),
+        "fee_charged": str(p.fee_charged),
+        "settled_at": p.settled_at.isoformat(),
+        "batch_id": p.batch_id,
+        "in_window": in_window,
+    }
 
 
 def build_report(
     decisions: list[MatchDecision],
     classified: list[ClassifiedRecord],
     verdicts: list[tuple[str, GuardVerdict]],
+    *,
+    unclassified: Iterable[str] = (),
+    orders: Optional[list[Order]] = None,
+    payouts: Optional[list[Payout]] = None,
 ) -> dict:
-    """Merge the three layers by key into a single structured report."""
+    """Merge the three layers by key into a single structured report.
+
+    `unclassified` lists escalations that deliberately got no LLM
+    classification (see classify.replay_matching_recordings); they are
+    reported as NEEDS_REVIEW. Passing `orders` and `payouts` attaches
+    each record's raw rows.
+    """
     classified_by_key = {r.key: r for r in classified}
     verdict_by_key = dict(verdicts)
+    unclassified_keys = set(unclassified)
+    orders_by_id = {o.order_id: o for o in orders} if orders is not None else {}
+    payouts_by_id = {p.payout_id: p for p in payouts} if payouts is not None else {}
     records: list[RecordReport] = []
 
     for d in decisions:
@@ -65,8 +116,19 @@ def build_report(
             matcher_matched_payout_ids=list(d.matched_payout_ids),
             matcher_reason=d.reason,
         )
+        if d.key in orders_by_id:
+            r.order = _order_row(orders_by_id[d.key])
+        r.payouts = (
+            [_payout_row(payouts_by_id[pid], True)
+             for pid in d.matched_payout_ids if pid in payouts_by_id]
+            + [_payout_row(payouts_by_id[pid], False)
+               for pid in d.out_of_window_payout_ids if pid in payouts_by_id]
+        )
         if d.status == "MATCHED":
             r.final_category = "MATCHED"
+        elif d.key in unclassified_keys and d.key not in classified_by_key:
+            r.guard_reason = NEEDS_REVIEW_REASON
+            r.final_category = NEEDS_REVIEW
         else:
             cr = classified_by_key.get(d.key)
             gv = verdict_by_key.get(d.key)
@@ -94,6 +156,7 @@ def build_report(
     llm_declined = sum(1 for r in records if r.llm_reconciles is False)
     guard_accepted = sum(1 for r in records if r.guard_verdict == "ACCEPTED")
     guard_rejected = sum(1 for r in records if r.guard_verdict == "REJECTED")
+    needs_review = sum(1 for r in records if r.final_category == NEEDS_REVIEW)
     final_counts = Counter(r.final_category for r in records)
 
     return {
@@ -106,6 +169,7 @@ def build_report(
             "llm_says_exception": llm_declined,
             "guard_accepted": guard_accepted,
             "guard_rejected": guard_rejected,
+            "needs_review": needs_review,
             "final_categories": dict(final_counts),
         },
         "records": [asdict(r) for r in records],

@@ -209,6 +209,64 @@ def classify_escalations(
     ]
 
 
+def _prompt_for(ctx: EscalationContext) -> str:
+    return build_user_prompt(
+        order=ctx.order,
+        in_pays=ctx.in_window_payouts,
+        out_pays=ctx.out_of_window_payouts,
+        strategy=ctx.decision.strategy,
+        matcher_reason=ctx.decision.reason,
+    )
+
+
+def replay_matching_recordings(
+    decisions: list[MatchDecision],
+    orders: list[Order],
+    payouts: list[Payout],
+    *,
+    evidence_dir: Path = DEFAULT_EVIDENCE_DIR,
+) -> tuple[list[ClassifiedRecord], list[str]]:
+    """
+    Replay for data the recordings were NOT necessarily captured on (the
+    public API, where anyone can upload a batch).
+
+    A recording is keyed by record id, so plain replay would hand the
+    answer recorded for ORD-0006 in the reference batch to any upload
+    that happens to contain an ORD-0006 with different amounts. Here a
+    recording is used only when the prompt it was captured with is
+    byte-identical to the prompt this record would produce now, i.e. the
+    model saw exactly this data. Anything else is returned unclassified
+    instead of guessed.
+
+    Returns (classified records, keys left unclassified), both in batch order.
+    """
+    classified: list[ClassifiedRecord] = []
+    unclassified: list[str] = []
+    for ctx in build_contexts(decisions, orders, payouts):
+        key = ctx.decision.key
+        path = _record_path(evidence_dir, key)
+        if not path.exists():
+            unclassified.append(key)
+            continue
+        recording = json.loads(path.read_text(encoding="utf-8"))
+        if recording.get("prompt_user") != _prompt_for(ctx):
+            unclassified.append(key)
+            continue
+        raw_text = recording["response_text"]
+        parsed = parse_response(raw_text)
+        classified.append(ClassifiedRecord(
+            key=key,
+            matcher_strategy=ctx.decision.strategy,
+            llm_category=parsed.get("category", "UNKNOWN"),
+            llm_reconciles=bool(parsed.get("reconciles", False)),
+            llm_reasoning=parsed.get("reasoning", ""),
+            llm_claim=parsed.get("claim", {}) or {},
+            llm_raw_response=raw_text,
+            mode="replay",
+        ))
+    return classified, unclassified
+
+
 # --------------------------------------------------------------------------
 # CLI
 # --------------------------------------------------------------------------
