@@ -4,6 +4,9 @@
 [![CI](https://github.com/Prathamcodin/settlement-recon-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Prathamcodin/settlement-recon-agent/actions/workflows/ci.yml)
 [![Tests 131](https://img.shields.io/badge/tests-131-brightgreen.svg)](tests/)
 [![Razorpay Buildathon — Track 04](https://img.shields.io/badge/Razorpay_Buildathon-Track_04-orange.svg)](#)
+[![Live demo](https://img.shields.io/badge/live_demo-vercel-black.svg)](https://settlement-recon-agent-beige.vercel.app)
+
+**Live demo: [settlement-recon-agent-beige.vercel.app](https://settlement-recon-agent-beige.vercel.app)**. Run the reference batch, open any record's audit trail, or try the Guard Lab. No sign-up needed. API docs are at [/api/docs](https://settlement-recon-agent-beige.vercel.app/api/docs).
 
 Matches merchant orders against aggregator settlements. Deterministic logic
 closes what it can; only the unresolved exceptions reach the LLM, and **no LLM
