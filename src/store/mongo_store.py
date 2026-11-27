@@ -103,6 +103,8 @@ class AuditStore:
     """Thin layer over two MongoDB collections. Takes a pymongo Database
     (or a mongomock one in tests), so it never decides where it connects."""
 
+    backend = "mongodb"
+
     def __init__(self, db) -> None:
         self.db = db
         self.runs = db["runs"]

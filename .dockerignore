@@ -25,3 +25,6 @@ venv/
 Dockerfile
 docker-compose.yml
 .dockerignore
+
+# The dashboard is deployed separately (static hosting); keep it out of the API image.
+web/

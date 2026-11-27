@@ -6,10 +6,14 @@
 #        verified in step 5.
 #
 #   docker compose --profile api up
-#     -> additionally starts MongoDB and the FastAPI /reconcile service on
-#        :8000. Classifier is replay-only; matcher and guard run live on
-#        uploaded CSVs. Every run is saved to MongoDB and can be queried
-#        through the /runs endpoints.
+#     -> additionally starts PostgreSQL and the FastAPI service on :8000.
+#        Classifier is replay-only; matcher and guard run live on any
+#        batch. Every run is saved to PostgreSQL and can be queried
+#        through the /runs endpoints. (MongoDB is still supported: start
+#        the `mongo` service and set MONGO_URL instead of DATABASE_URL.)
+#
+#   cd web && npm install && npm run dev
+#     -> the dashboard on :5173, talking to the API on :8000.
 #
 services:
   agent:
@@ -17,25 +21,36 @@ services:
     image: recon-agent:latest
     # Inherits the Dockerfile CMD (python run.py).
 
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    profiles: ["api"]
+
   mongo:
     image: mongo:7
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
-    profiles: ["api"]
+    profiles: ["mongo"]
 
   api:
     build: .
     image: recon-agent:latest
     command: ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
     environment:
-      MONGO_URL: mongodb://mongo:27017
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
     ports:
       - "8000:8000"
     depends_on:
-      - mongo
+      - postgres
     profiles: ["api"]
 
 volumes:
+  pg-data:
   mongo-data:
