@@ -2,7 +2,7 @@
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/Prathamcodin/settlement-recon-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Prathamcodin/settlement-recon-agent/actions/workflows/ci.yml)
-[![Tests 127](https://img.shields.io/badge/tests-127-brightgreen.svg)](tests/)
+[![Tests 131](https://img.shields.io/badge/tests-131-brightgreen.svg)](tests/)
 [![Razorpay Buildathon — Track 04](https://img.shields.io/badge/Razorpay_Buildathon-Track_04-orange.svg)](#)
 
 Matches merchant orders against aggregator settlements. Deterministic logic
@@ -203,10 +203,11 @@ changes anywhere else.
 | [src/api/](src/api/) | FastAPI service: pipeline endpoints, upload checks, rate limiting, `/runs`, `/guard/cases` |
 | [src/guard/cases.py](src/guard/cases.py) | Runs the hand-crafted guard fixtures live for the API and Guard Lab |
 | [web/](web/) | React + TypeScript dashboard (Vite) |
+| [api/index.py](api/index.py) | Vercel entry point: serves the FastAPI app under `/api` |
 | [src/tolerance.py](src/tolerance.py) | `max(Rs.0.50, 0.1% × gross)` — shared by matcher, guard, generator |
 | [src/models.py](src/models.py) | Shared dataclasses: `Order`, `Payout`, `MatchDecision` |
 | [src/store/](src/store/) | Audit store behind one interface: PostgreSQL and MongoDB backends, every run and its per-record audit trail |
-| [tests/](tests/) | 127 tests: matcher, classifier, guard, reporter, API, both stores (in memory and on real servers), generator |
+| [tests/](tests/) | 131 tests: matcher, classifier, guard, reporter, API, both stores (in memory and on real servers), generator |
 | [tests/fixtures/](tests/fixtures/) | Hand-crafted LLM-shaped adversarial + positive fixtures |
 | [evidence/](evidence/) | Live-recorded LLM output + before/after-guard artifacts |
 | [scripts/](scripts/) | Evaluation scripts (`capture_before_guard.py`, `capture_after_guard.py`, `scale_benchmark.py`, `stress_guard.py`) |
@@ -561,9 +562,9 @@ byte-identical to before, so the committed LLM recordings still line up.
 python -m pytest tests/
 ```
 
-**127 tests.** 5 need a real MongoDB (`MONGO_URL`) and 12 a real PostgreSQL
-(`TEST_DATABASE_URL`); without them those are skipped and the other 110 run
-anywhere. [CI](.github/workflows/ci.yml) starts both databases, runs all 127,
+**131 tests.** 5 need a real MongoDB (`MONGO_URL`) and 12 a real PostgreSQL
+(`TEST_DATABASE_URL`); without them those are skipped and the other 114 run
+anywhere. [CI](.github/workflows/ci.yml) starts both databases, runs all 131,
 and fails the build if any test is skipped; a second job type-checks, lints
 and builds the dashboard. On a fresh clone the reference batch is generated
 automatically ([tests/conftest.py](tests/conftest.py)). Coverage by layer:
@@ -575,6 +576,7 @@ automatically ([tests/conftest.py](tests/conftest.py)). Coverage by layer:
 | `test_guard.py` | 15 | Parametrized over every fixture (adversarial rejected, positive accepted), smart-lie reason string, reconciles=false counterfactual logging, unknown-category rejection |
 | `test_reporter.py` | 4 | Report shape, guard-reject rendering, **two-labeled-facts invariant** (Live batch and Guard test as separate lines), graceful missing-evidence handling |
 | `test_api.py` | 27 | Root advertises replay-only, `GET /reconcile/sample` returns stable numbers, `POST /reconcile` round-trips uploads, an escalation with no recording is `NEEDS_REVIEW`, **a recording for different numbers is not replayed**, records carry their raw rows, generated batches (seed 42 reproduces the reference), readable 400s for bad CSVs, 413 for oversized uploads, BOM-prefixed CSVs accepted, sample downloads, guard cases endpoint, token-bucket refill and eviction, 429 with `Retry-After`, runs saved and queried through `/runs`, re-runs linked by fingerprint, 404s, 503 without a store |
+| `test_vercel_entry.py` | 4 | The Vercel entry point routes `/api/*` to the app, `/api` is the root endpoint, OpenAPI advertises the `/api` server, unknown routes 404 |
 | `test_store_contract.py` | 23 | The same 11 behaviour tests on mongomock and on real PostgreSQL, plus exact `NUMERIC` money in PostgreSQL |
 | `test_store.py` | 17 | Save and query runs, aggregation agrees with the report, category and exception filters, full audit trail, run isolation, half-written runs hidden, abandoned runs purged (in-progress ones kept, no orphans if the purge dies halfway), Decimal and decimal strings stored exactly, **saving a float raises and writes nothing**, LLM JSON numbers parsed as exact text, input fingerprint, indexes |
 | `test_generator_scale.py` | 3 | `--scale` multiplies every scenario, scaled keys are unique, scale 1 is byte-identical to the reference batch |
@@ -583,18 +585,38 @@ automatically ([tests/conftest.py](tests/conftest.py)). Coverage by layer:
 
 ## Deploy
 
-Three free-tier pieces:
+The whole app runs on one free [Vercel](https://vercel.com) project: the
+dashboard as static files, the API as a Python serverless function, and
+PostgreSQL from Vercel's Storage tab (Neon).
 
-| Piece | Where | Config |
+| Piece | How | Config |
 |---|---|---|
-| API | [Render](https://render.com) web service from the Dockerfile | [render.yaml](render.yaml): health check on `/health`, uvicorn on `$PORT` |
-| Database | [Neon](https://neon.tech) PostgreSQL | its connection string as `DATABASE_URL` on Render; tables are created on first connect |
-| Dashboard | [Vercel](https://vercel.com) or [Netlify](https://netlify.com), root `web/` | build `npm run build`, output `dist`, env `VITE_API_URL` = the Render URL; SPA rewrites in [web/vercel.json](web/vercel.json) and [web/public/_redirects](web/public/_redirects) |
+| Dashboard | `npm run build` in `web/`, served from `web/dist` | [vercel.json](vercel.json): every non-API route rewrites to `index.html` so deep links work |
+| API | [api/index.py](api/index.py) wraps the FastAPI app; `/api/*` rewrites to it | slim [api/requirements.txt](api/requirements.txt); the app is told its root path is `/api`, so `/api/docs` works too |
+| Database | Storage → Create → Neon Postgres, connected to the project | Vercel adds `DATABASE_URL`; tables are created on first connect |
 
-Set `ALLOWED_ORIGINS` on Render to the dashboard's URL so the browser may call
-the API. Render's free tier sleeps when idle; the dashboard pings `/health`
-on load and tells the visitor the server is waking up (about 30–60 s) instead
-of looking broken.
+Steps: import the repo on Vercel (leave the root directory as the repo root;
+`vercel.json` sets the build), create the Postgres database from the
+project's Storage tab, and redeploy so the function sees `DATABASE_URL`.
+
+Why it works on a serverless host:
+
+- **Same origin.** The production build calls `/api` on its own domain, so
+  there is no CORS setup and no API URL to configure.
+- **Read-only disk.** The reference CSVs are generated into `/tmp`
+  (`SAMPLE_DIR`) on first use; uploads and seeded batches already used
+  temporary folders.
+- **Idle connections.** Functions freeze between requests and Neon closes
+  idle connections, so the pool checks each connection before use and turns
+  off server-side prepared statements, which a pooled connection cannot keep.
+- **Rate limiting** reads the client IP from `X-Forwarded-For`, which Vercel
+  sets. Each function instance keeps its own token buckets, so the limit is
+  per instance: enough to stop casual abuse on a demo, not a shared quota.
+
+**Other hosts.** [render.yaml](render.yaml) runs the API from the Dockerfile on
+Render (set `DATABASE_URL` and `ALLOWED_ORIGINS` there), and the dashboard can
+then go anywhere static with `VITE_API_URL` set to the API's URL
+([web/public/_redirects](web/public/_redirects) handles Netlify).
 
 ## What we deliberately did NOT do
 

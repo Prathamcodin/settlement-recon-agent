@@ -16,7 +16,8 @@ function initialTheme(): Theme {
   return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-/** Free hosting sleeps when idle. Ping /health on load and explain the wait if it is slow. */
+/** Serverless functions and the free database start cold after a quiet spell.
+ *  Ping /health on load and explain the wait if it is slow. */
 function useWakeBanner() {
   const [state, setState] = useState<"idle" | "slow" | "down">("idle");
   useEffect(() => {
@@ -116,7 +117,7 @@ export default function Layout() {
 
       {wake === "slow" && (
         <div className="banner" role="status">
-          <Spinner /> Waking the server. Free hosting sleeps when idle; this takes up to a minute.
+          <Spinner /> Waking the server after a quiet spell; this takes a few seconds.
         </div>
       )}
       {wake === "down" && (

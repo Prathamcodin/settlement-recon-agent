@@ -1,5 +1,8 @@
+/** The dev server talks to a local uvicorn; a production build calls /api on the
+ *  same origin (Vercel routes it to the Python function). VITE_API_URL overrides both. */
 export const API_URL: string =
-  (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "http://localhost:8000";
+  (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ??
+  (import.meta.env.DEV ? "http://localhost:8000" : "/api");
 
 export type Category =
   | "MATCHED"

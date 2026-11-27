@@ -36,7 +36,7 @@ const STATS = [
   ["0", "false auto-matches on 100,800 records"],
   ["6 / 6", "fabricated AI claims rejected"],
   ["50,000", "generated claims in the guard stress test"],
-  ["127", "automated tests on every push"],
+  ["131", "automated tests on every push"],
 ];
 
 export default function Home() {

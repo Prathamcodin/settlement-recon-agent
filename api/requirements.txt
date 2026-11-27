@@ -1,0 +1,6 @@
+# Runtime dependencies of the deployed API only (Vercel installs this file for
+# api/index.py). Test and CLI tools live in the root requirements.txt.
+fastapi~=0.115
+python-multipart~=0.0.20
+pymongo~=4.10
+psycopg[binary,pool]~=3.2
